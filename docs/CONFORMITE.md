@@ -14,7 +14,7 @@ Référence : version de travail du 24 septembre 2026, 15 pages, lue le 5 octobr
 | 8 - Tests | Jest/Supertest avec MongoDB temporaire ; test navigateur complémentaire |
 | 9 - Documentation | README complet, Swagger et fichier OpenAPI, exploitation locale, workflow CI fourni |
 | 10 - Recette | Résultats dans RECETTE.md, captures locales et contrôles automatiques |
-| 11 - Remise | Historique du starter conservé, commit local final identifiable par git rev-parse HEAD ; publication et dépôt scolaire non effectués |
+| 11 - Remise | Historique du starter conservé, dépôt GitHub individuel privé, version identifiée par le tag v1.0.0 et son SHA ; dépôt sur la plateforme scolaire non effectué |
 | 12 - Soutenance | Trame minutée, démonstration et questions dans SOUTENANCE.md ; présentation à réaliser personnellement |
 
 Le dépôt de départ contenait une route de liste incomplète, sans protection de compte, et une propriété `deadline`. La version livrée utilise le champ contractuel `dueDate`, l’enveloppe `{items: [...]}`, les cinq méthodes et les erreurs prévues par le PDF. Le package cors importé mais non déclaré dans le starter est supprimé : le proxy Vite et le service du build sur la même origine suffisent.

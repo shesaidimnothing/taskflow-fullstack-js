@@ -45,7 +45,7 @@ Les tests API ne remplacent pas MongoDB par des objets simulés. Le test de reco
 
 ## Limites de la recette
 
-Le parcours automatisé a été exécuté dans Chrome, pas dans Safari ou Firefox. Le contrôle clavier porte sur le début du formulaire ; il ne constitue pas une certification d’accessibilité. Docker, un hébergement cloud et GitHub Actions à distance n’ont pas été exécutés. La persistance après redémarrage de MongoDB lui-même repose sur la configuration WiredTiger/volume ; le test automatisé de redémarrage porte sur Express.
+Le parcours automatisé a été exécuté dans Chrome, pas dans Safari ou Firefox. Le contrôle clavier porte sur le début du formulaire ; il ne constitue pas une certification d’accessibilité. Docker et un hébergement cloud n’ont pas été exécutés. Les résultats de GitHub Actions sont consultables dans l’onglet Actions du dépôt ; les résultats chiffrés ci-dessus sont ceux de la recette locale. La persistance après redémarrage de MongoDB lui-même repose sur la configuration WiredTiger/volume ; le test automatisé de redémarrage porte sur Express.
 
 Les dépendances affichent des avertissements de dépréciation pour ESLint 9 et une dépendance transitive glob. ESLint 9 est retenu pour la compatibilité avec eslint-plugin-react. Jest ESM utilise l’option expérimentale de Node. Ces avertissements n’ont pas fait échouer les contrôles ; les dépendances exactes sont gelées dans package-lock.json.
 
