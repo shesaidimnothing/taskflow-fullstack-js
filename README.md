@@ -1,64 +1,168 @@
-# Starter Full Stack JS
+# TaskFlow
 
-Point de départ minimal pour les projets étudiants du module Full Stack JS.
+Projet Full Stack JS basé sur [titoms/devfullstack](https://github.com/titoms/devfullstack), commit de départ `6481ea6`, et sur le **LIVRET ETUDIANT V2**, version de travail du 24 septembre 2026. Sujet A : gérer ses tâches personnelles, avec un compte et des données privées.
 
-## Prérequis
+Le projet réalise le MVP du livret : inscription, connexion, liste, création, détail, modification et suppression de tâches. Les bonus B1 à B4 ne sont pas revendiqués. Le choix TaskFlow suit l’ébauche déjà présente dans le dépôt. Les modalités institutionnelles encore provisoires dans le livret restent à confirmer auprès du formateur.
 
-- Node.js 20 ou plus récent ;
-- npm 10 ou plus récent.
+## Démarrage rapide
 
-## Installation
+Prérequis : Node.js **22.12 ou supérieur** (vérifié avec 22.20.0), npm 10 ou supérieur (vérifié avec 11.6.2), Internet pour installer les dépendances et télécharger MongoDB au premier lancement. Les commandes ci-dessous se lancent depuis la racine du dépôt.
 
-Depuis ce dossier :
-
-```bash
-npm install
+```sh
+npm ci
+npm run setup
+npm run db:local
 ```
 
-## Démarrage
+Laisser ce premier terminal ouvert. Dans un deuxième terminal, depuis le même dossier :
 
-```bash
+```sh
 npm run dev
 ```
 
-Cette commande démarre le frontend Vite et le backend Express simultanément.
+Ouvrir **http://localhost:5173** et créer un compte. Aucun compte ni mot de passe de démonstration n’est imposé.
 
 - Frontend : http://localhost:5173
 - API santé : http://localhost:3000/api/health
-- API santé via le proxy Vite : http://localhost:5173/api/health
+- Swagger interactif : http://localhost:3000/api/docs/
+- OpenAPI JSON : http://localhost:3000/api/openapi.json
 
-Autres commandes :
+`npm run setup` crée `backend/.env` avec une clé JWT aléatoire ; un fichier existant est conservé. Le modèle sans secret est [backend/.env.example](backend/.env.example). Ne pas mettre de clé JWT dans une variable `VITE_*`.
 
-```bash
-npm run build
-npm run start
-npm test
+`npm run db:local` démarre un vrai processus MongoDB 7.0.14, géré par mongodb-memory-server, avec le moteur **WiredTiger et un dossier durable `.local/mongodb/`**. Malgré le nom de la bibliothèque, ce mode de développement conserve les données sur disque. Les tests emploient d’autres instances temporaires. Arrêter les processus avec Ctrl+C. Ne pas lancer deux bases sur le port 27017.
+
+### Alternative Docker pour MongoDB
+
+Avec Docker Engine démarré, remplacer `npm run db:local` par :
+
+```sh
+docker compose up -d mongo
 ```
 
-`npm run build` construit le frontend. `npm run start` démarre uniquement le backend en mode production locale. `npm test` lance les tests backend.
+Le volume `taskflow-data` conserve les données. `docker compose down` arrête la base ; ajouter `-v` effacerait le volume et ses données. Docker est une alternative fournie, le lancement vérifié sur cette machine utilise `npm run db:local`.
 
-## Structure
+### Configuration
+
+| Variable serveur | Rôle | Valeur locale |
+| --- | --- | --- |
+| PORT | Port d’écoute Express | 3000 |
+| MONGODB_URI | Connexion MongoDB | mongodb://127.0.0.1:27017/taskflow |
+| JWT_SECRET | Signature HS256, 32 caractères minimum | Générée par `npm run setup` |
+
+Le fichier `.env` est lu depuis le dossier de travail du backend. Utiliser les scripts npm documentés pour conserver ce comportement. Si PORT change, adapter aussi la cible du proxy dans `frontend/vite.config.js`. Les ports 3000, 5173 et 27017 doivent être disponibles. Les tests navigateur et de redémarrage utilisent 3100 et 3101.
+
+## Commandes
+
+```sh
+npm run dev --workspace backend
+npm run dev --workspace frontend
+npm run lint
+npm test
+npm run build
+npm run check
+npm run test:persistence
+```
+
+Les deux premières commandes permettent de lancer séparément Express et Vite. `check` enchaîne lint, tests API et build. `npm test` télécharge MongoDB au premier passage si nécessaire et lance Jest/Supertest sur une base temporaire isolée ; aucune base de développement n’est nettoyée.
+
+Tests de bout en bout :
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+Sur cette machine, Chrome installé a été utilisé avec `PLAYWRIGHT_CHANNEL=chrome npm run test:e2e`. La suite crée sa propre base et son propre serveur, teste le build réel, puis les arrête. Les captures sont dans `.local/screenshots/`. Le test de persistance démarre l’API, crée une tâche, arrête le processus Node, le relance et relit la tâche avec le même JWT.
+
+## Production locale et préparation au déploiement
+
+```sh
+npm run build
+npm start
+```
+
+MongoDB doit rester actif. Express sert alors l’interface compilée sur **http://localhost:3000**, l’API et Swagger sur la même origine. `npm start` ne lance pas Vite. En développement, Vite relaie `/api` vers Express ; aucun CORS permissif n’est nécessaire.
+
+Pour un hébergement : installer les dépendances, construire le front, renseigner PORT/MONGODB_URI/JWT_SECRET côté serveur, fournir une base MongoDB persistante et démarrer avec `npm start`. Utiliser HTTPS via l’hébergeur ou un reverse proxy et protéger l’accès réseau à MongoDB. Le dépôt ne contient pas d’identifiants cloud. Aucun déploiement public n’a été effectué ; son obligation et la plateforme ne sont pas fixées dans le livret.
+
+## Architecture
 
 ```text
-frontend/     application React avec Vite
-backend/      serveur Express
-  src/app.js  création de l'application et route health
-  src/server.js démarrage du serveur
+frontend/src/
+  App.jsx                 session et structure générale
+  api.js                  appels HTTP et erreurs API
+  components/Auth.jsx     inscription et connexion
+  components/Dashboard.jsx liste, détail, formulaires, confirmation
+backend/src/
+  app.js                  application Express importable sans écouter un port
+  server.js               configuration, MongoDB et écoute HTTP
+  routes/                 chemins et middleware de connexion
+  controllers/            requêtes/réponses HTTP
+  services/               logique métier et requêtes limitées au propriétaire
+  models/                 schémas Mongoose User et Task
+  middleware/             vérification JWT et erreurs communes
+  utils/validation.js     validation stricte des entrées
+backend/test/             Jest + Supertest
+e2e/                      parcours navigateur Playwright
+scripts/                  configuration, MongoDB local et vérification de persistance
+docs/                     OpenAPI, recette, soutenance et correspondance au livret
 ```
 
-## Proxy Vite
+Exemple : React envoie `POST /api/tasks` avec un Bearer. Le middleware vérifie le JWT et le compte, le contrôleur appelle le service, le service valide les champs puis le modèle écrit dans MongoDB avec l’ownerId du compte authentifié. La réponse ne contient que l’identifiant public et les champs métier. Les documents du starter dans `docs/superpowers/` décrivent son état initial ; ils ne constituent pas le cahier des charges de cette version complète.
 
-En développement, une requête frontend vers `/api/...` est transmise automatiquement à Express sur `http://localhost:3000`. Les composants React peuvent donc appeler `/api/health` sans coder l'adresse du backend.
+## Contrat API
 
-## À développer pendant le cours
+| Méthode | Route | Succès |
+| --- | --- | --- |
+| GET | /api/health | 200, `{"status":"ok"}` |
+| POST | /api/auth/register | 201, `{user:{id,email},token}` |
+| POST | /api/auth/login | 200, `{user:{id,email},token}` |
+| GET | /api/tasks | 200, `{items:[...]}` |
+| POST | /api/tasks | 201, tâche créée |
+| GET | /api/tasks/:id | 200, tâche |
+| PATCH | /api/tasks/:id | 200, tâche modifiée |
+| DELETE | /api/tasks/:id | 204 sans corps |
 
-Ce starter ne contient volontairement pas :
+Les cinq routes métier nécessitent `Authorization: Bearer <JWT>`. Swagger permet de s’inscrire ou se connecter, de copier le token retourné dans **Authorize**, puis d’essayer les routes. La description complète se trouve dans [docs/openapi.json](docs/openapi.json).
 
-- API métier et routes CRUD ;
-- MongoDB et modèles de données ;
-- authentification et autorisation ;
-- validation ;
-- tests de votre application métier ;
-- documentation de votre application.
+Exemple de corps de création :
 
-Vous concevrez ces éléments pour TaskFlow, HabitLab ou BudgetFlow.
+```json
+{
+  "title": "Préparer la démo",
+  "status": "todo",
+  "description": "Revoir le parcours complet",
+  "dueDate": "2026-10-05"
+}
+```
+
+`title` est trimé et contient 1 à 120 caractères. `status` est obligatoirement `todo`, `doing` ou `done`. `description` est facultative, accepte la chaîne vide et reste limitée à 1000 caractères. `dueDate` est facultative, vaut `null` ou une date civile réelle YYYY-MM-DD. Elle est stockée en chaîne pour préserver le jour civil sans décalage de fuseau ; le rendu utilise UTC. Les années vont de 0001 à 9999. Les POST sans titre/statut, PATCH vides, champs inconnus, `id`, `ownerId`, opérateurs MongoDB et mauvais types sont refusés.
+
+Les erreurs ont toujours la forme `{"error":{"code":"INVALID_INPUT","message":"Message lisible"}}` : 400/INVALID_INPUT, 401/UNAUTHORIZED, 404/NOT_FOUND, 409/EMAIL_ALREADY_USED. Les erreurs inattendues donnent 500/INTERNAL_ERROR sans trace ni secret.
+
+## Sécurité et choix expliqués
+
+- Email trimé, normalisé en minuscules et index unique MongoDB ; une collision d’index retourne 409.
+- Mots de passe hachés avec bcrypt, coût 12, jamais retournés. Au moins 8 caractères à l’inscription. Une limite supplémentaire de 72 octets UTF-8 évite la troncature silencieuse de bcrypt.
+- JWT signé en HS256, durée d’une heure. La clé vient uniquement de l’environnement serveur. Signature, expiration, sujet et existence du compte sont vérifiés.
+- Le navigateur conserve la session dans `sessionStorage` : elle survit au rechargement dans l’onglet. Se déconnecter efface la copie locale ; un 401 renvoie à la connexion. Ce stockage reste accessible au JavaScript : une faille XSS pourrait lire le jeton. React échappe le texte, Helmet définit des en-têtes de protection, mais ce choix ne remplace pas une prévention XSS complète.
+- Un JWT déjà copié reste valide jusqu’à son expiration même après déconnexion : pas de liste de révocation ni de refresh token dans ce MVP.
+- Toutes les lectures, mises à jour et suppressions filtrent par `_id` **et** `ownerId`. Retourner 404 pour une ressource d’un autre compte évite d’en confirmer l’existence.
+- La liste filtre par ownerId ; le client ne peut jamais sélectionner son propriétaire. La validation serveur protège aussi contre des requêtes HTTP qui contournent React.
+
+## Outils de construction et CI/CD
+
+Vite fournit le serveur de développement, le rechargement rapide, le proxy API et la construction des fichiers du navigateur. Babel est un outil de transformation JavaScript/JSX ; le plugin React de Vite peut l’utiliser, notamment en développement. Webpack est un autre bundler possible : il n’est pas installé dans ce projet, car Vite fournit déjà la chaîne de build. Un bundler assemble les modules et prépare les fichiers distribués ; il ne remplace pas le serveur Express.
+
+Le workflow `.github/workflows/ci.yml` prévoit `npm ci`, lint, Jest/Supertest, build, test de redémarrage et Playwright. Ces vérifications s’exécuteraient sur GitHub après publication dans un dépôt disposant d’Actions ; le workflow n’a pas été exécuté à distance pendant cette réalisation. Un déploiement CD pourrait venir après ces contrôles.
+
+## Recette, soutenance et remise
+
+- [Recette exécutée et limites](docs/RECETTE.md)
+- [Correspondance avec les TP du livret](docs/CONFORMITE.md)
+- [Déroulé et questions de soutenance](docs/SOUTENANCE.md)
+- [Assistance utilisée](docs/ASSISTANCE.md)
+
+Le dépôt conserve l’historique du starter puis un commit local de livraison. Obtenir le SHA exact avec `git rev-parse HEAD` et vérifier l’état avec `git status --short`. Cette version est préparée pour relecture, pas déposée sur la plateforme de l’établissement. La publication GitHub, une archive éventuelle, la date de gel et le déploiement restent à décider selon les consignes finales.
+
+Limites : pas de pagination, de récupération de mot de passe, de confirmation d’email, de limitation des tentatives de connexion ni de collaboration entre comptes. Les bonus sont laissés de côté. Les polices Google sont facultatives : sans réseau, les polices système prennent le relais. La couverture clavier et mobile vérifiée ne constitue pas un audit d’accessibilité complet.

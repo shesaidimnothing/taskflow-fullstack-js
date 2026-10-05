@@ -1,24 +1,26 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from "helmet";
-import { config } from './config/env.js';
+import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { taskRouter } from './routes/taskRoutes.js';
-
+import { authRouter } from './routes/authRoutes.js';
+import { errorHandler } from './middleware/errors.js';
+import { notFound } from './utils/errors.js';
 const app = express();
-
-app.use(express.json());
+const openapi = JSON.parse(readFileSync(new URL('../../docs/openapi.json', import.meta.url), 'utf8'));
+app.disable('x-powered-by');
 app.use(helmet());
-app.use(cors({
-  origin: config.corsOrigin
-}));
-
-app.get('/', (_request, response) => {
-  response.status(200).json({ status: 'API - Cours Dev Full stack' });
-});
-app.get('/api/health', (_request, response) => {
-  response.status(200).json({ status: 'ok' });
-});
-
+app.use(express.json({ limit: '16kb' }));
+app.get('/api/health', (_request, response) => response.json({ status: 'ok' }));
+app.get('/api/openapi.json', (_request, response) => response.json(openapi));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi));
+app.use('/api/auth', authRouter);
 app.use('/api/tasks', taskRouter);
-
+app.use('/api', () => { throw notFound(); });
+const dist = fileURLToPath(new URL('../../frontend/dist/', import.meta.url));
+app.use(express.static(dist));
+app.get('/', (_request, response, next) => response.sendFile('index.html', { root: dist }, error => { if (error) next(notFound()); }));
+app.use(() => { throw notFound(); });
+app.use(errorHandler);
 export default app;

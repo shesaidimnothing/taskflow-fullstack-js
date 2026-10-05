@@ -1,5 +1,5 @@
 {
-  "name": "fullstack-js-starter",
+  "name": "taskflow",
   "private": true,
   "version": "1.0.0",
   "workspaces": [
@@ -10,9 +10,25 @@
     "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
     "build": "npm run build --workspace frontend",
     "start": "npm run start --workspace backend",
-    "test": "npm run test --workspace backend"
+    "test": "npm run test --workspace backend",
+    "lint": "eslint .",
+    "db:local": "node scripts/local-mongo.js",
+    "check": "npm run lint && npm test && npm run build",
+    "test:e2e": "npm run build && playwright test",
+    "test:persistence": "node scripts/check-persistence.js",
+    "setup": "node scripts/setup.js"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
-  }
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "type": "module"
 }

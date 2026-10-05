@@ -7,3 +7,9 @@ coverage/
 npm-debug.log*
 *.log
 .DS_Store
+
+.local/
+.env.*
+!.env.example
+playwright-report/
+test-results/

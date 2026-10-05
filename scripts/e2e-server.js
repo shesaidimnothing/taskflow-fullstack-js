@@ -1,0 +1,11 @@
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { randomBytes } from 'node:crypto';
+const mongo = await MongoMemoryServer.create({ binary: { version: '7.0.14' } });
+process.env.JWT_SECRET = randomBytes(48).toString('hex');
+const { connectDb, disconnectDb } = await import('../backend/src/config/db.js');
+await connectDb(mongo.getUri('taskflow_e2e'));
+const { User } = await import('../backend/src/models/User.js');
+await User.init();
+const { default: app } = await import('../backend/src/app.js');
+const server = app.listen(3100, '127.0.0.1');
+for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => server.close(async () => { await disconnectDb(); await mongo.stop(); process.exit(0); }));

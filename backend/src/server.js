@@ -1,11 +1,11 @@
-import 'dotenv/config';
 import app from './app.js';
-import { connectDb } from './config/db.js'
-import { config } from './config/env.js'
+import { User } from './models/User.js';
+import { connectDb, disconnectDb } from './config/db.js';
+import { config, validateConfig } from './config/env.js';
+validateConfig();
 await connectDb(config.mongoUri);
-
-const port = Number(process.env.PORT) || 3000;
-
-app.listen(port, () => {
-  console.log(`API disponible sur http://localhost:${port}`);
-});
+await User.init();
+const server = app.listen(config.port, () => console.log(`TaskFlow : http://localhost:${config.port}`));
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.once(signal, () => server.close(async () => { await disconnectDb(); process.exit(0); }));
+}
