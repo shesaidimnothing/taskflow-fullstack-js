@@ -84,11 +84,10 @@ export default function App() {
             <span className="account-trigger-chevron" aria-hidden="true">▼</span>
           </button>
           {menuOpen && (
-            <div className="account-dropdown-popover" role="menu">
+            <div className="account-dropdown-popover">
               <button
                 type="button"
                 className="account-dropdown-item"
-                role="menuitem"
                 onClick={() => { setView('account'); setMenuOpen(false); }}
               >
                 <svg className="dropdown-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -100,7 +99,6 @@ export default function App() {
               <button
                 type="button"
                 className="account-dropdown-item disconnect-item"
-                role="menuitem"
                 onClick={() => logout()}
               >
                 <svg className="dropdown-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

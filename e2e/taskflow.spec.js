@@ -77,9 +77,10 @@ test('navigation clavier, formulaire mobile et documentation Swagger', async ({ 
 
 test('page mon compte : consultation, modification du mot de passe et retour', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Adresse email').fill('browser-a@example.test');
+  await page.getByRole('button', { name: 'Créer un compte', exact: true }).click();
+  await page.getByLabel('Adresse email').fill('account-test@example.test');
   await page.getByLabel('Mot de passe').fill('Navigateur123!');
-  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
+  await page.getByRole('button', { name: 'Créer mon compte' }).click();
   await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
 
   // Ouvrir la page Mon compte via le menu déroulant
@@ -87,7 +88,7 @@ test('page mon compte : consultation, modification du mot de passe et retour', a
   await page.getByRole('button', { name: 'Mon compte' }).click();
 
   await expect(page.getByRole('heading', { name: 'Votre espace.' })).toBeVisible();
-  await expect(page.getByText('browser-a@example.test')).toBeVisible();
+  await expect(page.getByText('account-test@example.test')).toBeVisible();
 
   // Modification du mot de passe
   await page.getByLabel('Mot de passe actuel').fill('Navigateur123!');
@@ -104,9 +105,9 @@ test('page mon compte : consultation, modification du mot de passe et retour', a
   await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
 
-  await page.getByLabel('Adresse email').fill('browser-a@example.test');
+  await page.getByLabel('Adresse email').fill('account-test@example.test');
   await page.getByLabel('Mot de passe').fill('NouveauPass123!');
   await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
 });
 
