@@ -39,6 +39,7 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.getByLabel('Titre', { exact: true }).fill('Tâche privée A');
   await page.getByRole('button', { name: 'Créer la tâche', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toBeVisible();
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await page.getByRole('button', { name: 'Créer un compte', exact: true }).click();
   await page.getByLabel('Adresse email').fill('browser-b@example.test');
@@ -46,6 +47,7 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.getByRole('button', { name: 'Créer mon compte' }).click();
   await expect(page.getByRole('heading', { name: 'Faites de la place à vos projets.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await page.getByLabel('Adresse email').fill('browser-a@example.test');
   await page.getByLabel('Mot de passe').fill('wrong-password');
@@ -72,3 +74,39 @@ test('navigation clavier, formulaire mobile et documentation Swagger', async ({ 
   await expect(page.getByRole('heading', { name: /TaskFlow API/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Authorize/ }).first()).toBeVisible();
 });
+
+test('page mon compte : consultation, modification du mot de passe et retour', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Adresse email').fill('browser-a@example.test');
+  await page.getByLabel('Mot de passe').fill('Navigateur123!');
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
+
+  // Ouvrir la page Mon compte via le menu déroulant
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
+  await page.getByRole('button', { name: 'Mon compte' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Votre espace.' })).toBeVisible();
+  await expect(page.getByText('browser-a@example.test')).toBeVisible();
+
+  // Modification du mot de passe
+  await page.getByLabel('Mot de passe actuel').fill('Navigateur123!');
+  await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('NouveauPass123!');
+  await page.getByLabel('Confirmer le nouveau mot de passe').fill('NouveauPass123!');
+  await page.getByRole('button', { name: 'Modifier le mot de passe' }).click();
+  await expect(page.getByRole('status')).toContainText('modifié');
+
+  // Retour aux tâches
+  await page.getByRole('button', { name: '← Mes tâches' }).click();
+  await expect(page.getByRole('heading', { name: 'Une chose à la fois.' })).toBeVisible();
+
+  // Déconnexion et reconnexion avec le nouveau mot de passe
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
+  await page.getByRole('button', { name: 'Se déconnecter' }).click();
+
+  await page.getByLabel('Adresse email').fill('browser-a@example.test');
+  await page.getByLabel('Mot de passe').fill('NouveauPass123!');
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toBeVisible();
+});
+
