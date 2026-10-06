@@ -153,6 +153,61 @@
         }
       }
     },
+    "/api/auth/password": {
+      "patch": {
+        "summary": "Modifier le mot de passe",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Mot de passe modifié, aucun corps"
+          },
+          "400": {
+            "description": "INVALID_INPUT : corps incorrect ou règles non respectées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED : authentification refusée ou mot de passe actuel incorrect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR : erreur interne sans détail sensible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/tasks": {
       "get": {
         "summary": "Consulter les tâches du compte",
@@ -704,6 +759,26 @@
             "type": "string",
             "minLength": 1,
             "description": "Maximum 72 octets UTF-8 (limite bcrypt)."
+          }
+        }
+      },
+      "PasswordChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Mot de passe actuel, vérifié par bcrypt."
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Nouveau mot de passe. Au moins 8 caractères, maximum 72 octets UTF-8."
           }
         }
       }

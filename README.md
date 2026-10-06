@@ -45,11 +45,11 @@ Le volume `taskflow-data` conserve les données. `docker compose down` arrête l
 
 ### Configuration
 
-| Variable serveur | Rôle | Valeur locale |
-| --- | --- | --- |
-| PORT | Port d’écoute Express | 3000 |
-| MONGODB_URI | Connexion MongoDB | mongodb://127.0.0.1:27017/taskflow |
-| JWT_SECRET | Signature HS256, 32 caractères minimum | Générée par `npm run setup` |
+| Variable serveur | Rôle                                   | Valeur locale                      |
+| ---------------- | -------------------------------------- | ---------------------------------- |
+| PORT             | Port d’écoute Express                  | 3000                               |
+| MONGODB_URI      | Connexion MongoDB                      | mongodb://127.0.0.1:27017/taskflow |
+| JWT_SECRET       | Signature HS256, 32 caractères minimum | Générée par `npm run setup`        |
 
 Le fichier `.env` est lu depuis le dossier de travail du backend. Utiliser les scripts npm documentés pour conserver ce comportement. Si PORT change, adapter aussi la cible du proxy dans `frontend/vite.config.js`. Les ports 3000, 5173 et 27017 doivent être disponibles. Les tests navigateur et de redémarrage utilisent 3100 et 3101.
 
@@ -95,6 +95,7 @@ frontend/src/
   api.js                  appels HTTP et erreurs API
   components/Auth.jsx     inscription et connexion
   components/Dashboard.jsx liste, détail, formulaires, confirmation
+  components/Account.jsx  informations du compte et changement de mot de passe
 backend/src/
   app.js                  application Express importable sans écouter un port
   server.js               configuration, MongoDB et écoute HTTP
@@ -114,16 +115,17 @@ Exemple : React envoie `POST /api/tasks` avec un Bearer. Le middleware vérifie 
 
 ## Contrat API
 
-| Méthode | Route | Succès |
-| --- | --- | --- |
-| GET | /api/health | 200, `{"status":"ok"}` |
-| POST | /api/auth/register | 201, `{user:{id,email},token}` |
-| POST | /api/auth/login | 200, `{user:{id,email},token}` |
-| GET | /api/tasks | 200, `{items:[...]}` |
-| POST | /api/tasks | 201, tâche créée |
-| GET | /api/tasks/:id | 200, tâche |
-| PATCH | /api/tasks/:id | 200, tâche modifiée |
-| DELETE | /api/tasks/:id | 204 sans corps |
+| Méthode | Route              | Succès                         |
+| ------- | ------------------ | ------------------------------ |
+| GET     | /api/health        | 200, `{"status":"ok"}`         |
+| POST    | /api/auth/register | 201, `{user:{id,email},token}` |
+| POST    | /api/auth/login    | 200, `{user:{id,email},token}` |
+| PATCH   | /api/auth/password | 204 sans corps                 |
+| GET     | /api/tasks         | 200, `{items:[...]}`           |
+| POST    | /api/tasks         | 201, tâche créée               |
+| GET     | /api/tasks/:id     | 200, tâche                     |
+| PATCH   | /api/tasks/:id     | 200, tâche modifiée            |
+| DELETE  | /api/tasks/:id     | 204 sans corps                 |
 
 Les cinq routes métier nécessitent `Authorization: Bearer <JWT>`. Swagger permet de s’inscrire ou se connecter, de copier le token retourné dans **Authorize**, puis d’essayer les routes. La description complète se trouve dans [docs/openapi.json](docs/openapi.json).
 
@@ -157,13 +159,6 @@ Les erreurs ont toujours la forme `{"error":{"code":"INVALID_INPUT","message":"M
 Vite fournit le serveur de développement, le rechargement rapide, le proxy API et la construction des fichiers du navigateur. Babel est un outil de transformation JavaScript/JSX ; le plugin React de Vite peut l’utiliser, notamment en développement. Webpack est un autre bundler possible : il n’est pas installé dans ce projet, car Vite fournit déjà la chaîne de build. Un bundler assemble les modules et prépare les fichiers distribués ; il ne remplace pas le serveur Express.
 
 Le workflow `.github/workflows/ci.yml` exécute `npm ci`, lint, Jest/Supertest, build, test de redémarrage et Playwright. Ces vérifications sont déclenchées sur GitHub à chaque push ou pull request. Leur statut est consultable dans [GitHub Actions](https://github.com/shesaidimnothing/taskflow-fullstack-js/actions). Un déploiement CD pourrait venir après ces contrôles.
-
-## Recette, soutenance et remise
-
-- [Recette exécutée et limites](docs/RECETTE.md)
-- [Correspondance avec les TP du livret](docs/CONFORMITE.md)
-- [Déroulé et questions de soutenance](docs/SOUTENANCE.md)
-- [Assistance utilisée](docs/ASSISTANCE.md)
 
 Le dépôt conserve l’historique du starter et les commits de réalisation et de livraison. Obtenir le SHA exact avec `git rev-parse HEAD` et vérifier l’état avec `git status --short`. Le dépôt GitHub privé est créé à la demande de l’étudiant. Le tag `v1.0.0` identifie la version remise sur GitHub ; son SHA exact est obtenu avec `git rev-parse v1.0.0^{commit}`. La remise sur la plateforme de l’établissement, l’accès du correcteur, une archive éventuelle, la date de gel institutionnelle et le déploiement restent à fixer selon les consignes finales. Le caractère public du dépôt n’est pas imposé par le livret ; le correcteur devra disposer d’un accès à ce dépôt privé.
 

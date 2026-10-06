@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { config } from '../config/env.js';
-import { validateAuth } from '../utils/validation.js';
+import { validateAuth, validatePasswordChange } from '../utils/validation.js';
 import { ApiError, unauthorized } from '../utils/errors.js';
 function session(user) {
   return {
@@ -25,4 +25,11 @@ export async function login(body) {
   const user = await User.findOne({ email }).select('+passwordHash');
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) throw unauthorized();
   return session(user);
+}
+export async function changePassword(userId, body) {
+  const { currentPassword, newPassword } = validatePasswordChange(body);
+  const user = await User.findById(userId).select('+passwordHash');
+  if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) throw unauthorized();
+  user.passwordHash = await bcrypt.hash(newPassword, 12);
+  await user.save();
 }

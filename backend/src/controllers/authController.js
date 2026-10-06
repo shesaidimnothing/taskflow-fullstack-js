@@ -5,3 +5,7 @@ export async function register(request, response) {
 export async function login(request, response) {
   response.json(await authService.login(request.body));
 }
+export async function changePassword(request, response) {
+  await authService.changePassword(request.userId, request.body);
+  response.status(204).end();
+}

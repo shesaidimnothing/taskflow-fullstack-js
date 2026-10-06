@@ -13,3 +13,4 @@ npm-debug.log*
 !.env.example
 playwright-report/
 test-results/
+AA/
