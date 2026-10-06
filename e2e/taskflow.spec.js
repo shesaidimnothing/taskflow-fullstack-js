@@ -88,7 +88,7 @@ test('page mon compte : consultation, modification du mot de passe et retour', a
   await page.getByRole('button', { name: 'Mon compte' }).click();
 
   await expect(page.getByRole('heading', { name: 'Votre espace.' })).toBeVisible();
-  await expect(page.getByText('account-test@example.test')).toBeVisible();
+  await expect(page.locator('.account-meta strong')).toHaveText('account-test@example.test');
 
   // Modification du mot de passe
   await page.getByLabel('Mot de passe actuel').fill('Navigateur123!');
