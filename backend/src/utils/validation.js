@@ -46,3 +46,9 @@ export function validateTaskQuery(query) {
   if (query.sort !== undefined && !SORTS.includes(query.sort)) throw invalid('Le tri doit être createdAt, dueDate ou priority.');
   return { status: query.status, priority: query.priority, dueFrom: query.dueFrom, dueTo: query.dueTo, sort: query.sort ?? 'createdAt' };
 }
+export function validatePasswordChange(body) {
+  objectBody(body, ['currentPassword', 'newPassword']);
+  if (typeof body.currentPassword !== 'string' || !body.currentPassword.length) throw invalid('Le mot de passe actuel est requis.');
+  if (typeof body.newPassword !== 'string' || body.newPassword.length < 8 || Buffer.byteLength(body.newPassword, 'utf8') > 72) throw invalid('Le nouveau mot de passe doit contenir au moins 8 caractères et au maximum 72 octets.');
+  return { currentPassword: body.currentPassword, newPassword: body.newPassword };
+}
