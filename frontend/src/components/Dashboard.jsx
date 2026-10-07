@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 const labels = { todo: 'À faire', doing: 'En cours', done: 'Terminée' };
 const empty = { title: '', status: 'todo', description: '', dueDate: '' };
+const filterLabels = { all: 'Toutes', todo: 'À faire', doing: 'En cours', done: 'Terminées' };
 function displayDate(value) {
   return value ? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`)) : 'Sans échéance';
 }
@@ -15,6 +16,7 @@ export default function Dashboard({ request }) {
   const [mode, setMode] = useState('list');
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState(empty);
+  const [filter, setFilter] = useState('all');
   const heading = useRef(null);
   async function refresh() {
     setLoading(true); setError('');
@@ -50,6 +52,10 @@ export default function Dashboard({ request }) {
     finally { setBusy(false); }
   }
   function change(event) { setForm({ ...form, [event.target.name]: event.target.value }); }
+  // filtre seulement à l'affichage : l'API renvoie toujours toutes les tâches du compte
+  const counts = { all: items.length, todo: 0, doing: 0, done: 0 };
+  for (const task of items) counts[task.status] += 1;
+  const visible = filter === 'all' ? items : items.filter(task => task.status === filter);
   return <section className="dashboard">
     <div className="page-heading"><div><p className="eyebrow">VOTRE ESPACE PERSONNEL</p><h1 ref={heading} tabIndex={-1}>{mode === 'list' ? 'Une chose à la fois.' : mode === 'create' ? 'Une nouvelle idée ?' : mode === 'edit' ? 'Ajuster le programme.' : mode === 'delete' ? 'Supprimer cette tâche ?' : 'Tout est dans le détail.'}</h1><p>{mode === 'list' ? 'Gardez le cap sur ce que vous avez envie d’accomplir.' : 'Chaque petit pas compte.'}</p></div>
       {mode === 'list' ? <button className="primary" disabled={busy || loading} onClick={() => { setForm(empty); setMode('create'); setError(''); setSuccess(''); }}>+ Nouvelle tâche</button> : <button className="ghost" disabled={busy} onClick={() => { setMode('list'); setError(''); }}>← Mes tâches</button>}
@@ -57,7 +63,8 @@ export default function Dashboard({ request }) {
     {error && <div className="message error" role="alert">{error} {mode === 'list' && <button onClick={refresh}>Réessayer</button>}</div>}
     {success && <p className="message" role="status">{success}</p>}
     {loading ? <p role="status" className="empty-state">Chargement de votre espace…</p> : mode === 'list' ? <div className="task-section"><div className="section-label"><h2>Mes tâches</h2><span>VOTRE PROCHAINE ÉTAPE COMMENCE ICI</span></div>
-      {!items.length ? <div className="empty-state"><div className="empty-symbol" aria-hidden="true">↗</div><h2>Faites de la place à vos projets.</h2><p>Ajoutez votre première tâche. Le reste viendra pas à pas.</p></div> : <div className="task-grid">{items.map(task => <button className="task-card" key={task.id} disabled={busy} onClick={() => openTask(task.id)} aria-label={`Consulter ${task.title}`}><div className="card-top"><span className={`badge ${task.status}`}>{labels[task.status]}</span><span aria-hidden="true">↗</span></div><h3>{task.title}</h3><p>{task.description || 'Un petit pas de plus vers votre objectif.'}</p><div className="card-bottom">{displayDate(task.dueDate)}<span>Voir la tâche →</span></div></button>)}</div>}
+      {items.length > 0 && <div className="filters" role="group" aria-label="Filtrer par statut">{Object.entries(filterLabels).map(([value, label]) => <button key={value} type="button" className={filter === value ? 'filter active' : 'filter'} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label} ({counts[value]})</button>)}</div>}
+      {!items.length ? <div className="empty-state"><div className="empty-symbol" aria-hidden="true">↗</div><h2>Faites de la place à vos projets.</h2><p>Ajoutez votre première tâche. Le reste viendra pas à pas.</p></div> : !visible.length ? <p className="empty-state">Aucune tâche avec ce statut pour le moment.</p> : <div className="task-grid">{visible.map(task => <button className="task-card" key={task.id} disabled={busy} onClick={() => openTask(task.id)} aria-label={`Consulter ${task.title}`}><div className="card-top"><span className={`badge ${task.status}`}>{labels[task.status]}</span><span aria-hidden="true">↗</span></div><h3>{task.title}</h3><p>{task.description || 'Un petit pas de plus vers votre objectif.'}</p><div className="card-bottom">{displayDate(task.dueDate)}<span>Voir la tâche →</span></div></button>)}</div>}
     </div> : mode === 'create' || mode === 'edit' ? <form className="editor panel" onSubmit={save}>
       <label htmlFor="title">Titre</label><input id="title" name="title" value={form.title} onChange={change} required maxLength={120} placeholder="Qu’avez-vous en tête ?" />
       <div className="form-row"><div><label htmlFor="status">Statut</label><select id="status" name="status" value={form.status} onChange={change}>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><div><label htmlFor="dueDate">Échéance (facultative)</label><input id="dueDate" name="dueDate" type="date" min="0001-01-01" max="9999-12-31" value={form.dueDate} onChange={change} /></div></div>
