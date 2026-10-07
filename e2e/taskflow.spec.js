@@ -40,6 +40,7 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.getByLabel('Titre', { exact: true }).fill('Tâche privée A');
   await page.getByRole('button', { name: 'Créer la tâche', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toBeVisible();
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await page.getByRole('link', { name: 'Créer un compte', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Créer mon espace' })).toBeVisible();
@@ -48,6 +49,7 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.getByRole('button', { name: 'Créer mon compte' }).click();
   await expect(page.getByRole('heading', { name: 'Faites de la place à vos projets.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await page.getByLabel('Adresse email').fill('browser-a@example.test');
   await page.getByLabel('Mot de passe').fill('wrong-password');
@@ -109,6 +111,7 @@ test('routes directes, historique navigateur, formulaires et protection de sessi
   await page.getByRole('button', { name: 'Annuler', exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/tasks');
@@ -126,3 +129,39 @@ test('routes directes, historique navigateur, formulaires et protection de sessi
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('status')).toContainText('expiré');
 });
+
+test('page mon compte : consultation, modification du mot de passe et retour', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Créer un compte', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Créer mon espace' })).toBeVisible();
+  await page.getByLabel('Adresse email').fill('account-test@example.test');
+  await page.getByLabel('Mot de passe').fill('Navigateur123!');
+  await page.getByRole('button', { name: 'Créer mon compte' }).click();
+  await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
+  await page.getByRole('button', { name: 'Mon compte' }).click();
+
+  await expect(page).toHaveURL(/\/account$/);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Votre espace.' })).toBeVisible();
+  await expect(page.locator('.account-meta strong')).toHaveText('account-test@example.test');
+
+  await page.getByLabel('Mot de passe actuel').fill('Navigateur123!');
+  await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('NouveauPass123!');
+  await page.getByLabel('Confirmer le nouveau mot de passe').fill('NouveauPass123!');
+  await page.getByRole('button', { name: 'Modifier le mot de passe' }).click();
+  await expect(page.getByRole('status')).toContainText('modifié');
+
+  await page.getByRole('button', { name: '← Mes tâches' }).click();
+  await expect(page.getByRole('heading', { name: 'Une chose à la fois.' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Menu utilisateur' }).click();
+  await page.getByRole('button', { name: 'Se déconnecter' }).click();
+
+  await page.getByLabel('Adresse email').fill('account-test@example.test');
+  await page.getByLabel('Mot de passe').fill('NouveauPass123!');
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
+});
+

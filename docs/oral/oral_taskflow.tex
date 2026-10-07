@@ -83,7 +83,7 @@ En cliquant dessus, j'ouvre le détail. Je peux relire sa description, puis la m
 
 Pour la suppression, l'application demande une confirmation. Je peux annuler si je me suis trompé. Si je confirme, la tâche disparaît de ma liste. Cela couvre les actions principales demandées : créer, consulter, modifier et supprimer.
 
-Je termine en montrant le compte B, préparé dans un autre navigateur. Sa liste ne contient pas les tâches du compte A. Chaque personne retrouve donc son propre espace. Je vais maintenant expliquer simplement comment l'application conserve ces informations et contrôle les accès.
+Le menu utilisateur permet aussi d'accéder à Mon compte pour consulter son profil et changer son mot de passe. Cette fonction déjà ajoutée au projet a été conservée. Je termine en montrant le compte B, préparé dans un autre navigateur. Sa liste ne contient pas les tâches du compte A. Chaque personne retrouve donc son propre espace. Je vais maintenant expliquer simplement comment l'application conserve ces informations et contrôle les accès.
 
 \action{Prévoir environ deux minutes de manipulations : inscription ; création ; détail ; modification ; rechargement ; suppression annulée puis confirmée ; affichage du compte B. Garder une seconde tâche de A pour illustrer la séparation des listes.}
 
@@ -103,7 +103,7 @@ Mais être connecté ne donne pas accès à toutes les tâches. Le serveur véri
 
 Pour vérifier que l'application ne fonctionne pas seulement dans un cas idéal, plusieurs contrôles sont prévus. Les tests API vérifient les opérations sur les tâches, les données invalides et les problèmes de connexion. Ils vérifient aussi que le compte B ne peut pas lire, modifier ou supprimer une tâche appartenant à A.
 
-La suite API compte 37 tests. Trois tests de parcours dans un navigateur complètent ces contrôles. Ils vérifient notamment les formulaires, les modifications de tâches et l'affichage sur mobile. Le nouveau test ajouté pour les consignes vérifie la navigation, les liens directs, le retour en arrière et la redirection quand la session n'est plus valide.
+La suite API compte 37 tests. Quatre tests de parcours dans un navigateur complètent ces contrôles. Ils vérifient notamment les formulaires, les modifications de tâches et l'affichage sur mobile. Le nouveau test ajouté pour les consignes vérifie la navigation, les liens directs, le retour en arrière et la redirection quand la session n'est plus valide.
 
 Les tests utilisent des données fictives dans des bases temporaires. Ils ne suppriment pas les tâches de développement. Le projet contient aussi un contrôle de qualité du code et une commande de construction de l'interface.
 
@@ -170,12 +170,12 @@ Ces réponses sont à préparer pour l'échange après la présentation, pas à 
 
 \question{Pourquoi TaskFlow ?}{C'est le sujet A du catalogue, consacré aux tâches personnelles. Le dépôt de départ contenait déjà une ébauche autour de cette donnée métier. Un seul sujet a été réalisé.}
 \question{À quoi sert useState dans les formulaires ?}{Il permet à React de garder la valeur des champs pendant la saisie. À chaque modification, l'état est mis à jour ; à l'envoi, les valeurs courantes sont transmises au serveur.}
-\question{Pourquoi React Router ?}{Il associe une adresse à une page et permet de naviguer avec des liens. Ici, les pages principales sont /login, /register et /tasks. Link et NavLink gèrent les liens ; Navigate sert aux redirections.}
+\question{Pourquoi React Router ?}{Il associe une adresse à une page et permet de naviguer avec des liens. Ici, les pages principales sont /login, /register, /tasks et /account. Link et NavLink gèrent les liens ; Navigate sert aux redirections.}
 \question{Pourquoi séparer TaskList, TaskItem et TaskForm ?}{La liste organise les tâches, un item affiche une tâche et le formulaire gère la saisie. Chaque composant a un rôle simple, ce qui facilite la lecture et les changements.}
 \question{Comment le front communique-t-il avec le serveur ?}{Un client centralisé utilise fetch. Il envoie les données en JSON et ajoute le jeton pour les routes protégées. Le navigateur affiche ensuite le résultat ou un message d'erreur.}
 \question{Pourquoi B ne voit-il pas les tâches de A ?}{Le serveur filtre les données selon le compte connecté et vérifie le propriétaire pour chaque objet. Masquer un bouton ne suffirait pas, puisque l'API peut être appelée directement.}
 \question{Quelle différence entre 401 et 404 ?}{401 correspond à une authentification absente ou refusée. 404 indique qu'une tâche n'est pas accessible au compte : elle est absente ou appartient à quelqu'un d'autre.}
 \question{Que se passe-t-il au redémarrage ?}{Les données sont dans MongoDB. Redémarrer Express ne les efface pas. Le projet contient un test qui le vérifie réellement.}
 \question{Quelle limite présente la session ?}{Le jeton est dans sessionStorage et reste accessible au JavaScript. Une faille XSS pourrait le lire. La déconnexion efface la copie locale mais ne révoque pas un jeton déjà copié, qui expire après une heure.}
-\question{Quelle aide a été utilisée ?}{Le projet a été préparé avec Codex pour le code, les tests et la documentation. Cette aide figure dans ASSISTANCE.md. Présenter honnêtement les vérifications et la compréhension personnelle, selon les règles effectivement communiquées par l'établissement.}
+\question{Quelle aide a été utilisée ?}{Le projet a été préparé avec Codex pour le code, les tests et la documentation. Présenter honnêtement les vérifications et la compréhension personnelle, selon les règles effectivement communiquées par l'établissement.}
 \end{document}

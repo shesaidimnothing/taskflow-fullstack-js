@@ -31,3 +31,9 @@ Source : fichier `untitled.txt` placé sur le Bureau, lu le 7 octobre 2026. Les 
 Le discours détaillé est dans `docs/oral/DISCOURS_10_MINUTES.md`, son source LaTeX dans `docs/oral/oral_taskflow.tex` et son PDF dans `output/pdf/oral_taskflow.pdf`. Il présente le besoin, les consignes, une démonstration, le fonctionnement général, les vérifications et les limites. Les détails de sécurité avancés sont réservés aux questions.
 
 Référence de navigation : [documentation officielle React Router](https://reactrouter.com/start/declarative/routing).
+
+## Intégration de la version distante
+
+Les commits distants jusqu'à `9ae8a37` ajoutaient la page Mon compte, le menu utilisateur et le changement de mot de passe. Ces fonctionnalités ont été conservées et reliées à la route protégée `/account`. Leur test de parcours est conservé, ce qui porte la suite navigateur à quatre scénarios. Les suppressions à distance des anciens documents de recette, conformité, assistance et des notes du starter sont respectées ; le support de soutenance est réécrit pour la demande actuelle.
+
+Le LaTeX est compilé avec Tectonic 0.17.0 et son PDF est vérifié visuellement. Les résultats finaux des tests sont accessibles dans GitHub Actions pour le commit publié.

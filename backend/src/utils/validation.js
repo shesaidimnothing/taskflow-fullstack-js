@@ -27,3 +27,9 @@ export function validateTask(body, partial = false) {
 export function validateId(id) {
   if (!/^[a-fA-F0-9]{24}$/.test(id)) throw invalid('Identifiant invalide.');
 }
+export function validatePasswordChange(body) {
+  objectBody(body, ['currentPassword', 'newPassword']);
+  if (typeof body.currentPassword !== 'string' || !body.currentPassword.length) throw invalid('Le mot de passe actuel est requis.');
+  if (typeof body.newPassword !== 'string' || body.newPassword.length < 8 || Buffer.byteLength(body.newPassword, 'utf8') > 72) throw invalid('Le nouveau mot de passe doit contenir au moins 8 caractères et au maximum 72 octets.');
+  return { currentPassword: body.currentPassword, newPassword: body.newPassword };
+}

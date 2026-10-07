@@ -34,7 +34,7 @@ En cliquant dessus, j'ouvre le détail. Je peux relire sa description, puis la m
 
 Pour la suppression, l'application demande une confirmation. Je peux annuler si je me suis trompé. Si je confirme, la tâche disparaît de ma liste. Cela couvre les actions principales demandées : créer, consulter, modifier et supprimer.
 
-Je termine en montrant le compte B, préparé dans un autre navigateur. Sa liste ne contient pas les tâches du compte A. Chaque personne retrouve donc son propre espace. Je vais maintenant expliquer simplement comment l'application conserve ces informations et contrôle les accès.
+Le menu utilisateur permet aussi d'accéder à Mon compte pour consulter son profil et changer son mot de passe. Cette fonction déjà ajoutée au projet a été conservée. Je termine en montrant le compte B, préparé dans un autre navigateur. Sa liste ne contient pas les tâches du compte A. Chaque personne retrouve donc son propre espace. Je vais maintenant expliquer simplement comment l'application conserve ces informations et contrôle les accès.
 
 **À montrer :** Prévoir environ deux minutes de manipulations : inscription ; création ; détail ; modification ; rechargement ; suppression annulée puis confirmée ; affichage du compte B. Garder une seconde tâche de A pour illustrer la séparation des listes.
 
@@ -54,7 +54,7 @@ Mais être connecté ne donne pas accès à toutes les tâches. Le serveur véri
 
 Pour vérifier que l'application ne fonctionne pas seulement dans un cas idéal, plusieurs contrôles sont prévus. Les tests API vérifient les opérations sur les tâches, les données invalides et les problèmes de connexion. Ils vérifient aussi que le compte B ne peut pas lire, modifier ou supprimer une tâche appartenant à A.
 
-La suite API compte 37 tests. Trois tests de parcours dans un navigateur complètent ces contrôles. Ils vérifient notamment les formulaires, les modifications de tâches et l'affichage sur mobile. Le nouveau test ajouté pour les consignes vérifie la navigation, les liens directs, le retour en arrière et la redirection quand la session n'est plus valide.
+La suite API compte 37 tests. Quatre tests de parcours dans un navigateur complètent ces contrôles. Ils vérifient notamment les formulaires, les modifications de tâches et l'affichage sur mobile. Le nouveau test ajouté pour les consignes vérifie la navigation, les liens directs, le retour en arrière et la redirection quand la session n'est plus valide.
 
 Les tests utilisent des données fictives dans des bases temporaires. Ils ne suppriment pas les tâches de développement. Le projet contient aussi un contrôle de qualité du code et une commande de construction de l'interface.
 
