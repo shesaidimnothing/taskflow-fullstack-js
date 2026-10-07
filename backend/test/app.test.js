@@ -71,6 +71,13 @@ test('les champs facultatifs peuvent être omis et une date bissextile est valid
   expect(response.status).toBe(201); expect(response.body.dueDate).toBeNull();
   expect((await request(app).patch(`/api/tasks/${response.body.id}`).set(auth(tokenA)).send({ dueDate: '2028-02-29' })).status).toBe(200);
 });
+test('valeurs limites acceptées : titre de 120 caractères et description de 1000', async () => {
+  const response = await request(app).post('/api/tasks').set(auth(tokenA)).send({ title: 'x'.repeat(120), status: 'todo', description: 'y'.repeat(1000) });
+  expect(response.status).toBe(201);
+  expect(response.body.title).toHaveLength(120); expect(response.body.description).toHaveLength(1000);
+  const patch = await request(app).patch(`/api/tasks/${response.body.id}`).set(auth(tokenA)).send({ title: 'z'.repeat(120) });
+  expect(patch.status).toBe(200); expect(patch.body.title).toHaveLength(120);
+});
 test.each([{ title: '' }, { title: '   ' }, { title: 'x'.repeat(121) }, { title: 1 }, { status: 'archived' }, { status: null }, { description: null }, { description: 'x'.repeat(1001) }, { dueDate: '2026-02-29' }, { dueDate: '2026-04-31' }, { dueDate: '2026-13-01' }, { dueDate: '2026-1-01' }, { dueDate: '' }, { dueDate: 123 }, { ownerId: '507f1f77bcf86cd799439011' }, { id: '507f1f77bcf86cd799439011' }, { unknown: true }, { '$set': { title: 'hack' } }])('POST/PATCH rejettent %j', async invalid => {
   expectError(await request(app).post('/api/tasks').set(auth(tokenA)).send({ ...taskBody, ...invalid }), 400, 'INVALID_INPUT');
   const task = await create();
