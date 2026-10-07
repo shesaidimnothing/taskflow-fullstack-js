@@ -55,7 +55,7 @@ test.each([{ email: 'invalid', password }, { email: 'x@example.test', password: 
 test('parcours CRUD complet, enveloppe items, id public, trim et suppression 204', async () => {
   expect((await request(app).get('/api/tasks').set(auth(tokenA))).body).toEqual({ items: [] });
   const created = await request(app).post('/api/tasks').set(auth(tokenA)).send({ ...taskBody, title: '  Préparer la démo  ' });
-  expect(created.status).toBe(201); expect(created.body).toEqual({ ...taskBody, id: expect.stringMatching(/^[a-f0-9]{24}$/) });
+  expect(created.status).toBe(201); expect(created.body).toEqual({ ...taskBody, priority: 'medium', id: expect.stringMatching(/^[a-f0-9]{24}$/) });
   const id = created.body.id;
   const detail = await request(app).get(`/api/tasks/${id}`).set(auth(tokenA));
   expect(detail.status).toBe(200); expect(detail.body).toEqual(created.body);
@@ -108,6 +108,49 @@ test('isolation A/B : liste, lecture, modification, suppression et objet A prés
     expectError(await call, 404, 'NOT_FOUND');
   }
   expect((await request(app).get(`/api/tasks/${task.body.id}`).set(auth(tokenA))).body).toEqual(task.body);
+});
+describe('bonus B1 : priorité, filtres et tri', () => {
+  async function add(title, status, priority, dueDate = null) {
+    return (await request(app).post('/api/tasks').set(auth(tokenA)).send({ title, status, ...(priority ? { priority } : {}), dueDate })).body;
+  }
+  const titles = async query => (await request(app).get(`/api/tasks${query}`).set(auth(tokenA))).body.items.map(item => item.title);
+  test('priorité par défaut medium, modifiable et validée', async () => {
+    const task = await add('Sans priorité', 'todo');
+    expect(task.priority).toBe('medium');
+    const patch = await request(app).patch(`/api/tasks/${task.id}`).set(auth(tokenA)).send({ priority: 'high' });
+    expect(patch.status).toBe(200); expect(patch.body.priority).toBe('high');
+    for (const priority of ['urgent', '', null, 3]) {
+      expectError(await request(app).patch(`/api/tasks/${task.id}`).set(auth(tokenA)).send({ priority }), 400, 'INVALID_INPUT');
+    }
+  });
+  test('filtres status, priority et échéance, combinables', async () => {
+    await add('A', 'todo', 'high', '2026-10-01');
+    await add('B', 'done', 'low', '2026-10-10');
+    await add('C', 'todo', 'low', null);
+    await add('D', 'doing', 'high', '2026-10-20');
+    expect(await titles('?status=todo')).toEqual(['C', 'A']);
+    expect(await titles('?priority=high')).toEqual(['D', 'A']);
+    expect(await titles('?status=todo&priority=low')).toEqual(['C']);
+    expect(await titles('?dueTo=2026-10-09')).toEqual(['A']);
+    expect(await titles('?dueFrom=2026-10-10&dueTo=2026-10-20')).toEqual(['D', 'B']);
+    expect(await titles('?dueFrom=2026-10-10')).toEqual(['D', 'B']);
+    expect(await titles('?status=done&priority=high')).toEqual([]);
+  });
+  test('tri par échéance (sans date en dernier) et par priorité', async () => {
+    await add('Plus tard', 'todo', 'low', '2026-12-01');
+    await add('Sans date', 'todo', 'high');
+    await add('Bientôt', 'todo', 'medium', '2026-10-08');
+    expect(await titles('?sort=dueDate')).toEqual(['Bientôt', 'Plus tard', 'Sans date']);
+    expect(await titles('?sort=priority')).toEqual(['Sans date', 'Bientôt', 'Plus tard']);
+  });
+  test('les filtres restent limités au compte connecté', async () => {
+    await add('Tâche de A', 'todo', 'high');
+    const response = await request(app).get('/api/tasks?priority=high').set(auth(tokenB));
+    expect(response.body).toEqual({ items: [] });
+  });
+  test.each(['?status=archived', '?priority=urgent', '?dueFrom=2026-02-30', '?dueTo=demain', '?dueFrom=2026-10-10&dueTo=2026-10-01', '?sort=title', '?status=todo&status=done', '?ownerId=507f1f77bcf86cd799439011'])('filtre invalide %s : 400', async query => {
+    expectError(await request(app).get(`/api/tasks${query}`).set(auth(tokenA)), 400, 'INVALID_INPUT');
+  });
 });
 test.each(['get', 'patch', 'delete'])('%s : identifiant malformé 400 et absent 404', async method => {
   for (const [id, status, code] of [['invalid', 400, 'INVALID_INPUT'], ['507f1f77bcf86cd799439011', 404, 'NOT_FOUND']]) {

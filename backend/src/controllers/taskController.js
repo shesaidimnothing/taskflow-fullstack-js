@@ -1,6 +1,6 @@
 import * as service from '../services/taskService.js';
 export async function list(request, response) {
-  response.json({ items: await service.listTasks(request.userId) });
+  response.json({ items: await service.listTasks(request.userId, request.query) });
 }
 export async function create(request, response) {
   response.status(201).json(await service.createTask(request.userId, request.body));
