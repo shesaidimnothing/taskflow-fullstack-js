@@ -20,7 +20,7 @@ app.use('/api/tasks', taskRouter);
 app.use('/api', () => { throw notFound(); });
 const dist = fileURLToPath(new URL('../../frontend/dist/', import.meta.url));
 app.use(express.static(dist));
-app.get('/', (_request, response, next) => response.sendFile('index.html', { root: dist }, error => { if (error) next(notFound()); }));
+app.get(['/', '/login', '/register', '/tasks'], (_request, response, next) => response.sendFile('index.html', { root: dist }, error => { if (error) next(notFound()); }));
 app.use(() => { throw notFound(); });
 app.use(errorHandler);
 export default app;

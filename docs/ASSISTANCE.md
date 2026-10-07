@@ -5,3 +5,5 @@ La réalisation a été préparée avec Codex le 5 octobre 2026 : lecture du liv
 L’historique initial du dépôt est conservé. Cette aide ne doit pas être présentée comme un développement entièrement réalisé sans assistance. Le livret indique que la politique d’usage de l’IA doit encore être précisée par l’établissement : vérifier la règle effectivement communiquée avant la remise, et joindre cette déclaration si demandé.
 
 Avant de présenter le projet, l’étudiant doit relire et comprendre les fichiers, refaire la démonstration et adapter le discours à ce qu’il sait expliquer. Les résultats techniques vérifiés sont consignés dans RECETTE.md ; aucun résultat scolaire ou accord institutionnel n’est supposé.
+
+Le 7 octobre 2026, Codex a également comparé le fichier de consignes du professeur avec le projet, séparé les pages et composants React, ajouté le routage et les exemples Swagger, adapté les tests et réécrit le support oral et son source LaTeX.

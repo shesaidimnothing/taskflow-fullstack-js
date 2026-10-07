@@ -32,6 +32,9 @@
                       ]
                     }
                   }
+                },
+                "example": {
+                  "status": "ok"
                 }
               }
             }
@@ -48,6 +51,10 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Register"
+              },
+              "example": {
+                "email": "demo@example.test",
+                "password": "MotDePasse123!"
               }
             }
           }
@@ -59,6 +66,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Session"
+                },
+                "example": {
+                  "user": {
+                    "id": "507f1f77bcf86cd799439011",
+                    "email": "demo@example.test"
+                  },
+                  "token": "<JWT signé renvoyé par le serveur>"
                 }
               }
             }
@@ -69,6 +83,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Adresse email invalide."
+                  }
                 }
               }
             }
@@ -79,6 +99,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "EMAIL_ALREADY_USED",
+                    "message": "Cette adresse email est déjà utilisée."
+                  }
                 }
               }
             }
@@ -89,6 +115,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -105,6 +137,10 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Login"
+              },
+              "example": {
+                "email": "demo@example.test",
+                "password": "MotDePasse123!"
               }
             }
           }
@@ -116,6 +152,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Session"
+                },
+                "example": {
+                  "user": {
+                    "id": "507f1f77bcf86cd799439011",
+                    "email": "demo@example.test"
+                  },
+                  "token": "<JWT signé renvoyé par le serveur>"
                 }
               }
             }
@@ -126,6 +169,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Adresse email invalide."
+                  }
                 }
               }
             }
@@ -136,6 +185,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -146,6 +201,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -179,6 +240,17 @@
                       }
                     }
                   }
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "507f1f77bcf86cd799439011",
+                      "title": "Préparer la présentation",
+                      "status": "todo",
+                      "description": "Répéter la démonstration",
+                      "dueDate": "2026-10-12"
+                    }
+                  ]
                 }
               }
             }
@@ -189,6 +261,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -199,6 +277,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -219,6 +303,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": "507f1f77bcf86cd799439011",
+                  "title": "Préparer la présentation",
+                  "status": "todo",
+                  "description": "Répéter la démonstration",
+                  "dueDate": "2026-10-12"
                 }
               }
             }
@@ -229,6 +320,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Le titre doit contenir entre 1 et 120 caractères."
+                  }
                 }
               }
             }
@@ -239,6 +336,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -249,6 +352,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -260,6 +369,12 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TaskCreate"
+              },
+              "example": {
+                "title": "Préparer la présentation",
+                "status": "todo",
+                "description": "Répéter la démonstration",
+                "dueDate": "2026-10-12"
               }
             }
           }
@@ -281,6 +396,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": "507f1f77bcf86cd799439011",
+                  "title": "Préparer la présentation",
+                  "status": "todo",
+                  "description": "Répéter la démonstration",
+                  "dueDate": "2026-10-12"
                 }
               }
             }
@@ -291,6 +413,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Le titre doit contenir entre 1 et 120 caractères."
+                  }
                 }
               }
             }
@@ -301,6 +429,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -311,6 +445,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "Ressource introuvable."
+                  }
                 }
               }
             }
@@ -321,6 +461,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -352,6 +498,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": "507f1f77bcf86cd799439011",
+                  "title": "Préparer la présentation",
+                  "status": "done",
+                  "description": "Répéter la démonstration",
+                  "dueDate": "2026-10-12"
                 }
               }
             }
@@ -362,6 +515,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Le titre doit contenir entre 1 et 120 caractères."
+                  }
                 }
               }
             }
@@ -372,6 +531,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -382,6 +547,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "Ressource introuvable."
+                  }
                 }
               }
             }
@@ -392,6 +563,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }
@@ -414,6 +591,9 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TaskPatch"
+              },
+              "example": {
+                "status": "done"
               }
             }
           }
@@ -436,6 +616,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "Le titre doit contenir entre 1 et 120 caractères."
+                  }
                 }
               }
             }
@@ -446,6 +632,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "UNAUTHORIZED",
+                    "message": "Connexion requise ou identifiants incorrects."
+                  }
                 }
               }
             }
@@ -456,6 +648,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "NOT_FOUND",
+                    "message": "Ressource introuvable."
+                  }
                 }
               }
             }
@@ -466,6 +664,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "INTERNAL_ERROR",
+                    "message": "Une erreur interne est survenue."
+                  }
                 }
               }
             }

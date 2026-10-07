@@ -3,7 +3,8 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Heureux de vous revoir' })).toBeVisible();
   await page.screenshot({ path: '.local/screenshots/connexion.png', fullPage: true });
-  await page.getByRole('button', { name: 'Créer un compte', exact: true }).click();
+  await page.getByRole('link', { name: 'Créer un compte', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Créer mon espace' })).toBeVisible();
   await page.getByLabel('Adresse email').fill('browser-a@example.test');
   await page.getByLabel('Mot de passe').fill('Navigateur123!');
   await page.getByRole('button', { name: 'Créer mon compte' }).click();
@@ -40,7 +41,8 @@ test('parcours navigateur complet, rechargement, mobile et deuxième compte', as
   await page.getByRole('button', { name: 'Créer la tâche', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Consulter Tâche privée A' })).toBeVisible();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
-  await page.getByRole('button', { name: 'Créer un compte', exact: true }).click();
+  await page.getByRole('link', { name: 'Créer un compte', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Créer mon espace' })).toBeVisible();
   await page.getByLabel('Adresse email').fill('browser-b@example.test');
   await page.getByLabel('Mot de passe').fill('Navigateur123!');
   await page.getByRole('button', { name: 'Créer mon compte' }).click();
@@ -61,6 +63,10 @@ test('navigation clavier, formulaire mobile et documentation Swagger', async ({ 
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'TaskFlow, accueil' })).toBeFocused();
   await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Connexion', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Inscription', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
   await expect(page.getByLabel('Adresse email')).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByLabel('Mot de passe')).toBeFocused();
@@ -71,4 +77,52 @@ test('navigation clavier, formulaire mobile et documentation Swagger', async ({ 
   await page.goto('/api/docs/');
   await expect(page.getByRole('heading', { name: /TaskFlow API/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Authorize/ }).first()).toBeVisible();
+});
+
+
+test('routes directes, historique navigateur, formulaires et protection de session', async ({ page }) => {
+  await page.goto('/tasks');
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByRole('link', { name: 'Inscription', exact: true }).click();
+  await expect(page).toHaveURL(/\/register$/);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Créer mon espace' })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goForward();
+  await expect(page).toHaveURL(/\/register$/);
+  await page.getByLabel('Adresse email').fill('router@example.test');
+  await page.getByLabel('Mot de passe').fill('RouterTest123!');
+  await page.getByRole('button', { name: 'Créer mon compte', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks$/);
+  await page.goto('/login');
+  await expect(page).toHaveURL(/\/tasks$/);
+  await page.getByRole('button', { name: 'Nouvelle tâche' }).click();
+  await page.getByLabel('Titre', { exact: true }).fill('Test formulaire');
+  await page.getByRole('button', { name: 'Créer la tâche', exact: true }).click();
+  await page.getByRole('button', { name: 'Consulter Test formulaire' }).click();
+  await page.getByRole('button', { name: 'Modifier', exact: true }).click();
+  await expect(page.getByLabel('Titre', { exact: true })).toHaveValue('Test formulaire');
+  await page.getByRole('button', { name: 'Annuler', exact: true }).click();
+  await page.getByRole('button', { name: 'Nouvelle tâche' }).click();
+  await expect(page.getByLabel('Titre', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Annuler', exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Se déconnecter' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goto('/tasks');
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByLabel('Adresse email').fill('router@example.test');
+  await page.getByLabel('Mot de passe').fill('RouterTest123!');
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks$/);
+  await page.evaluate(() => {
+    const session = JSON.parse(sessionStorage.getItem('taskflow-session'));
+    session.token = 'invalid.token.value';
+    sessionStorage.setItem('taskflow-session', JSON.stringify(session));
+  });
+  await page.reload();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole('status')).toContainText('expiré');
 });

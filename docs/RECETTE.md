@@ -50,3 +50,15 @@ Le parcours automatisé a été exécuté dans Chrome, pas dans Safari ou Firefo
 Les dépendances affichent des avertissements de dépréciation pour ESLint 9 et une dépendance transitive glob. ESLint 9 est retenu pour la compatibilité avec eslint-plugin-react. Jest ESM utilise l’option expérimentale de Node. Ces avertissements n’ont pas fait échouer les contrôles ; les dépendances exactes sont gelées dans package-lock.json.
 
 La soutenance, la validation du sujet par l’établissement et la remise sur une plateforme restent des actions à réaliser par l’étudiant. Aucun accord du formateur n’est supposé.
+
+## Adaptation aux consignes du professeur - 7 octobre 2026
+
+- `npm run check` : lint sans erreur, 37 tests API réussis et build React réussi.
+- `npm run test:persistence` : conservation de la tâche après arrêt et redémarrage de l'API confirmée.
+- `PLAYWRIGHT_CHANNEL=chrome npm run test:e2e` : 3 tests navigateur réussis, incluant désormais les routes directes, l'historique Retour/Suivant, la redirection de session, les champs d'édition préremplis et le formulaire de création réinitialisé.
+- Les deux anciens parcours ont été adaptés aux liens de navigation et à la nouvelle navbar. Le test attend l'affichage de Registerpage avant de saisir, pour ne pas écrire dans LoginPage pendant une transition de navigation.
+- L'affichage mobile, la navigation clavier et Swagger sont toujours contrôlés.
+
+Les résultats GitHub Actions du commit publié restent consultables dans l'onglet Actions. Les chiffres ci-dessus correspondent à l'exécution locale de cette nouvelle version.
+
+Le support LaTeX a été compilé avec Tectonic 0.17.0 : PDF de 7 pages, sans débordement signalé par TeX. Les pages rendues ont été contrôlées visuellement. Le PDF et le source sont livrés avec le projet.

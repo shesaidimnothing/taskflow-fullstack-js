@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { api } from './api.js';
-import Auth from './components/Auth.jsx';
+import Navbar from './components/Navbar.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import Registerpage from './pages/Registerpage.jsx';
 function readSession() {
   try {
     const session = JSON.parse(sessionStorage.getItem('taskflow-session'));
@@ -29,10 +32,13 @@ export default function App() {
     }
   }
   return <div className="app-shell">
-    <header className="topbar"><a className="brand" href="/" aria-label="TaskFlow, accueil"><span className="brand-mark">t.</span>TaskFlow<span className="brand-caption">MON ESPACE</span></a>
-      {session && <div className="account"><span>{session.user.email}</span><button className="ghost" onClick={() => logout()}>Se déconnecter</button></div>}
-    </header>
-    <main>{session ? <Dashboard key={session.user.id} request={authorizedApi} /> : <Auth onSession={authenticate} notice={notice} />}</main>
+    <Navbar session={session} onLogout={() => logout()} />
+    <main><Routes>
+      <Route path="/login" element={session ? <Navigate to="/tasks" replace /> : <LoginPage onSession={authenticate} notice={notice} />} />
+      <Route path="/register" element={session ? <Navigate to="/tasks" replace /> : <Registerpage onSession={authenticate} notice={notice} />} />
+      <Route path="/tasks" element={session ? <Dashboard key={session.user.id} request={authorizedApi} /> : <Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to={session ? '/tasks' : '/login'} replace />} />
+    </Routes></main>
     <footer>TaskFlow <span>Un peu d’ordre. Plus de liberté.</span><a href="/api/docs" target="_blank" rel="noreferrer">Documentation API ↗</a></footer>
   </div>;
 }

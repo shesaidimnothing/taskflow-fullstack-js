@@ -4,6 +4,8 @@ Dépôt individuel : https://github.com/shesaidimnothing/taskflow-fullstack-js (
 
 Projet Full Stack JS basé sur [titoms/devfullstack](https://github.com/titoms/devfullstack), commit de départ `6481ea6`, et sur le **LIVRET ETUDIANT V2**, version de travail du 24 septembre 2026. Sujet A : gérer ses tâches personnelles, avec un compte et des données privées.
 
+La version `v1.1.0` adapte également le frontend aux consignes du professeur reçues le 7 octobre 2026. La [comparaison détaillée](docs/CONSIGNES_PROF.md) décrit les changements.
+
 Le projet réalise le MVP du livret : inscription, connexion, liste, création, détail, modification et suppression de tâches. Les bonus B1 à B4 ne sont pas revendiqués. Le choix TaskFlow suit l’ébauche déjà présente dans le dépôt. Les modalités institutionnelles encore provisoires dans le livret restent à confirmer auprès du formateur.
 
 ## Démarrage rapide
@@ -93,8 +95,15 @@ Pour un hébergement : installer les dépendances, construire le front, renseign
 frontend/src/
   App.jsx                 session et structure générale
   api.js                  appels HTTP et erreurs API
-  components/Auth.jsx     inscription et connexion
-  components/Dashboard.jsx liste, détail, formulaires, confirmation
+  pages/LoginPage.jsx     connexion et champs contrôlés avec useState
+  pages/Registerpage.jsx  inscription et champs contrôlés avec useState
+  components/Navbar.jsx   navigation avec React Router
+  components/AuthLayout.jsx mise en page commune des pages publiques
+  components/Dashboard.jsx coordination du CRUD et de la sélection
+  components/TaskList.jsx liste des tâches
+  components/TaskItem.jsx présentation d’une tâche
+  components/TaskForm.jsx formulaire de création et de modification
+  taskUtils.js            libellés et affichage des dates
 backend/src/
   app.js                  application Express importable sans écouter un port
   server.js               configuration, MongoDB et écoute HTTP
@@ -162,9 +171,24 @@ Le workflow `.github/workflows/ci.yml` exécute `npm ci`, lint, Jest/Supertest, 
 
 - [Recette exécutée et limites](docs/RECETTE.md)
 - [Correspondance avec les TP du livret](docs/CONFORMITE.md)
-- [Déroulé et questions de soutenance](docs/SOUTENANCE.md)
+- [Déroulé et préparation de soutenance](docs/SOUTENANCE.md)
+- [Discours détaillé de 10 minutes](docs/oral/DISCOURS_10_MINUTES.md)
+- [Source LaTeX autonome](docs/oral/oral_taskflow.tex) et [PDF de préparation](output/pdf/oral_taskflow.pdf)
+- [Comparaison des consignes du professeur](docs/CONSIGNES_PROF.md)
 - [Assistance utilisée](docs/ASSISTANCE.md)
 
-Le dépôt conserve l’historique du starter et les commits de réalisation et de livraison. Obtenir le SHA exact avec `git rev-parse HEAD` et vérifier l’état avec `git status --short`. Le dépôt GitHub privé est créé à la demande de l’étudiant. Le tag `v1.0.0` identifie la version remise sur GitHub ; son SHA exact est obtenu avec `git rev-parse v1.0.0^{commit}`. La remise sur la plateforme de l’établissement, l’accès du correcteur, une archive éventuelle, la date de gel institutionnelle et le déploiement restent à fixer selon les consignes finales. Le caractère public du dépôt n’est pas imposé par le livret ; le correcteur devra disposer d’un accès à ce dépôt privé.
+Le dépôt conserve l’historique du starter et les commits de réalisation et de livraison. Obtenir le SHA exact avec `git rev-parse HEAD` et vérifier l’état avec `git status --short`. Le dépôt GitHub privé est créé à la demande de l’étudiant. Le tag `v1.0.0` conserve la livraison initiale ; `v1.1.0` identifie la version adaptée aux consignes du professeur. Son SHA exact est obtenu avec `git rev-parse v1.1.0^{commit}`. La remise sur la plateforme de l’établissement, l’accès du correcteur, une archive éventuelle, la date de gel institutionnelle et le déploiement restent à fixer selon les consignes finales. Le caractère public du dépôt n’est pas imposé par le livret ; le correcteur devra disposer d’un accès à ce dépôt privé.
 
 Limites : pas de pagination, de récupération de mot de passe, de confirmation d’email, de limitation des tentatives de connexion ni de collaboration entre comptes. Les bonus sont laissés de côté. Les polices Google sont facultatives : sans réseau, les polices système prennent le relais. La couverture clavier et mobile vérifiée ne constitue pas un audit d’accessibilité complet.
+
+## Navigation React et support oral
+
+`BrowserRouter` associe les routes `/login`, `/register` et `/tasks` aux pages de l'application. La navbar utilise `Link` et `NavLink` ; `Navigate` renvoie vers la page adaptée à la session. Cette protection frontend améliore le parcours mais ne remplace pas les contrôles JWT et ownerId dans l'API. Les vues de détail, d'édition et de suppression restent des états internes de l'espace `/tasks`.
+
+Le LaTeX de l'oral est autonome, sans images ni chemins de fichiers locaux. Sur Overleaf, importer `docs/oral/oral_taskflow.tex` et choisir pdfLaTeX ou XeLaTeX. Avec une distribution LaTeX locale :
+
+```sh
+pdflatex -output-directory=output/pdf docs/oral/oral_taskflow.tex
+```
+
+Le PDF fourni est compilé avec Tectonic (moteur XeTeX). Le discours compte environ 1 180 mots et réserve du temps aux manipulations ; répéter avec un chronomètre pour ajuster le rythme aux dix minutes.
