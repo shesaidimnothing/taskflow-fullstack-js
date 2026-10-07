@@ -183,6 +183,16 @@
               }
             }
           },
+          "400": {
+            "description": "INVALID_INPUT : filtre inconnu, répété ou invalide",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "401": {
             "description": "UNAUTHORIZED : authentification refusée",
             "content": {
@@ -203,7 +213,73 @@
               }
             }
           }
-        }
+        },
+        "description": "Bonus B1 : filtres facultatifs et combinables. Sans paramètre, renvoie toutes les tâches du compte, les plus récentes en premier. Un paramètre inconnu, répété ou invalide donne 400.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "todo",
+                "doing",
+                "done"
+              ]
+            },
+            "description": "Ne garder que ce statut."
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "description": "Ne garder que cette priorité."
+          },
+          {
+            "name": "dueFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Échéance au plus tôt ce jour (inclus). Exclut les tâches sans échéance."
+          },
+          {
+            "name": "dueTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Échéance au plus tard ce jour (inclus). Exclut les tâches sans échéance."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "dueDate",
+                "priority"
+              ],
+              "default": "createdAt"
+            },
+            "description": "createdAt : plus récentes d’abord ; dueDate : échéance la plus proche, sans échéance en dernier ; priority : high, medium puis low."
+          }
+        ]
       },
       "post": {
         "summary": "Créer une tâche",
@@ -516,6 +592,16 @@
               "done"
             ]
           },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "description": "Bonus B1 : priorité de la tâche, medium par défaut."
+          },
           "description": {
             "type": "string",
             "maxLength": 1000,
@@ -549,6 +635,16 @@
               "done"
             ]
           },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "description": "Bonus B1 : priorité de la tâche, medium par défaut."
+          },
           "description": {
             "type": "string",
             "maxLength": 1000,
@@ -569,6 +665,7 @@
           "id",
           "title",
           "status",
+          "priority",
           "description",
           "dueDate"
         ],
@@ -590,6 +687,16 @@
               "doing",
               "done"
             ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "description": "Bonus B1 : priorité de la tâche, medium par défaut."
           },
           "description": {
             "type": "string",

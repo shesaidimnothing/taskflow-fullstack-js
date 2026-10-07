@@ -4,7 +4,7 @@ Dépôt individuel : https://github.com/shesaidimnothing/taskflow-fullstack-js (
 
 Projet Full Stack JS basé sur [titoms/devfullstack](https://github.com/titoms/devfullstack), commit de départ `6481ea6`, et sur le **LIVRET ETUDIANT V2**, version de travail du 24 septembre 2026. Sujet A : gérer ses tâches personnelles, avec un compte et des données privées.
 
-Le projet réalise le MVP du livret : inscription, connexion, liste, création, détail, modification et suppression de tâches. Les bonus B1 à B4 ne sont pas revendiqués. Le choix TaskFlow suit l’ébauche déjà présente dans le dépôt. Les modalités institutionnelles encore provisoires dans le livret restent à confirmer auprès du formateur.
+Le projet réalise le MVP du livret : inscription, connexion, liste, création, détail, modification et suppression de tâches. Le bonus B1 (priorité et filtres) a été ajouté ensuite, sans modifier le contrat du MVP ; B2 à B4 ne sont pas réalisés. Le choix TaskFlow suit l’ébauche déjà présente dans le dépôt. Les modalités institutionnelles encore provisoires dans le livret restent à confirmer auprès du formateur.
 
 ## Démarrage rapide
 
@@ -140,6 +140,16 @@ Exemple de corps de création :
 
 `title` est trimé et contient 1 à 120 caractères. `status` est obligatoirement `todo`, `doing` ou `done`. `description` est facultative, accepte la chaîne vide et reste limitée à 1000 caractères. `dueDate` est facultative, vaut `null` ou une date civile réelle YYYY-MM-DD. Elle est stockée en chaîne pour préserver le jour civil sans décalage de fuseau ; le rendu utilise UTC. Les années vont de 0001 à 9999. Les POST sans titre/statut, PATCH vides, champs inconnus, `id`, `ownerId`, opérateurs MongoDB et mauvais types sont refusés.
 
+### Bonus B1 : priorité, filtres et tri
+
+Réalisé après le MVP, sans changer les cinq routes ni les champs obligatoires : un POST avec seulement `title` et `status` fonctionne toujours.
+
+- Champ `priority` facultatif : `low`, `medium` ou `high`, `medium` par défaut. Il est renvoyé dans chaque tâche (propriété supplémentaire non sensible, autorisée par le contrat) et modifiable par PATCH. Toute autre valeur donne 400.
+- `GET /api/tasks` accepte des filtres facultatifs et combinables : `status`, `priority`, `dueFrom` et `dueTo` (dates incluses, AAAA-MM-JJ ; une tâche sans échéance est alors exclue) et `sort` (`createdAt` par défaut, `dueDate` avec les tâches sans échéance en dernier, ou `priority` de high à low). Exemple : `GET /api/tasks?status=todo&priority=high&sort=dueDate`.
+- Les filtres s’appliquent toujours en plus du filtre `ownerId` : ils ne permettent jamais de voir les tâches d’un autre compte. Un paramètre inconnu, répété ou invalide, ou `dueFrom` après `dueTo`, donne 400/INVALID_INPUT.
+- Côté React : priorité dans le formulaire, badges sur les cartes, boutons de statut, listes déroulantes priorité/échéance/tri et compteur de tâches. Les choix « Échéance passée », « Aujourd’hui » et « 7 prochains jours » sont calculés avec la date locale du navigateur puis envoyés en `dueFrom`/`dueTo`.
+- Tests dédiés dans `backend/test/app.test.js` (bloc « bonus B1 ») : valeur par défaut, validation, chaque filtre, combinaisons, tris, isolation A/B et filtres invalides.
+
 Les erreurs ont toujours la forme `{"error":{"code":"INVALID_INPUT","message":"Message lisible"}}` : 400/INVALID_INPUT, 401/UNAUTHORIZED, 404/NOT_FOUND, 409/EMAIL_ALREADY_USED. Les erreurs inattendues donnent 500/INTERNAL_ERROR sans trace ni secret.
 
 ## Sécurité et choix expliqués
@@ -167,4 +177,4 @@ Le workflow `.github/workflows/ci.yml` exécute `npm ci`, lint, Jest/Supertest, 
 
 Le dépôt conserve l’historique du starter et les commits de réalisation et de livraison. Obtenir le SHA exact avec `git rev-parse HEAD` et vérifier l’état avec `git status --short`. Le dépôt GitHub privé est créé à la demande de l’étudiant. Le tag `v1.0.0` identifie la version remise sur GitHub ; son SHA exact est obtenu avec `git rev-parse v1.0.0^{commit}`. La remise sur la plateforme de l’établissement, l’accès du correcteur, une archive éventuelle, la date de gel institutionnelle et le déploiement restent à fixer selon les consignes finales. Le caractère public du dépôt n’est pas imposé par le livret ; le correcteur devra disposer d’un accès à ce dépôt privé.
 
-Limites : pas de pagination, de récupération de mot de passe, de confirmation d’email, de limitation des tentatives de connexion ni de collaboration entre comptes. Les bonus sont laissés de côté. Les polices Google sont facultatives : sans réseau, les polices système prennent le relais. La couverture clavier et mobile vérifiée ne constitue pas un audit d’accessibilité complet.
+Limites : pas de pagination, de récupération de mot de passe, de confirmation d’email, de limitation des tentatives de connexion ni de collaboration entre comptes. Seul le bonus B1 est réalisé ; le tri par priorité est fait en JavaScript après la requête, ce qui convient tant que la liste n’est pas paginée. Les polices Google sont facultatives : sans réseau, les polices système prennent le relais. La couverture clavier et mobile vérifiée ne constitue pas un audit d’accessibilité complet.
