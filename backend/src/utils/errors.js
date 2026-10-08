@@ -1,4 +1,4 @@
-// Define standard API errors.
+// Définit les erreurs standard de l'API.
 export class ApiError extends Error {
   constructor(status, code, message) {
     super(message);

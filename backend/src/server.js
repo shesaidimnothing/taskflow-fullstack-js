@@ -1,4 +1,4 @@
-// Connect the database and manage the HTTP server lifecycle.
+// Connecte la base de données et gère le démarrage et l'arrêt du serveur HTTP.
 import app from './app.js';
 import { User } from './models/User.js';
 import { connectDb, disconnectDb } from './config/db.js';

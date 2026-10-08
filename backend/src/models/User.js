@@ -1,4 +1,4 @@
-// Define user storage and hide password hashes by default.
+// Définit le stockage des utilisateurs et masque les mots de passe hachés par défaut.
 import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },

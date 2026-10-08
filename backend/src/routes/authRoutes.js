@@ -1,4 +1,4 @@
-// Declare registration, login, and password routes.
+// Déclare les routes d'inscription, de connexion et de changement de mot de passe.
 import { Router } from 'express';
 import * as controller from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';

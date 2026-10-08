@@ -1,4 +1,4 @@
-// Configure Express routes, documentation, static files, and error handling.
+// Configure les routes Express, la documentation, les fichiers statiques et les erreurs.
 import express from 'express';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';

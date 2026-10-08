@@ -1,4 +1,4 @@
-// Load and validate backend environment settings.
+// Charge et vérifie les variables d'environnement du backend.
 import 'dotenv/config';
 export const config = {
   port: Number(process.env.PORT || 3000),

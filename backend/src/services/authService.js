@@ -1,4 +1,4 @@
-// Manage credentials, password hashing, and signed sessions.
+// Gère l'authentification, le hachage des mots de passe et la création des jetons JWT.
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';

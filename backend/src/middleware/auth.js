@@ -1,4 +1,4 @@
-// Authenticate JWTs and attach the current user to requests.
+// Vérifie les jetons JWT et associe l'utilisateur connecté aux requêtes.
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { User } from '../models/User.js';

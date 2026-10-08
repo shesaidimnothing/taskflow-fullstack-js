@@ -1,4 +1,4 @@
-// Validate authentication inputs, tasks, identifiers, and query filters.
+// Vérifie les données d'authentification, les tâches, les identifiants et les filtres.
 import { invalid } from './errors.js';
 export const PRIORITIES = ['low', 'medium', 'high'];
 const SORTS = ['createdAt', 'dueDate', 'priority'];
@@ -31,7 +31,7 @@ export function validateTask(body, partial = false) {
 export function validateId(id) {
   if (!/^[a-fA-F0-9]{24}$/.test(id)) throw invalid('Identifiant invalide.');
 }
-// Validate optional task filters and sort parameters.
+// Vérifie les filtres facultatifs et les paramètres de tri des tâches.
 export function validateTaskQuery(query) {
   const allowed = ['status', 'priority', 'dueFrom', 'dueTo', 'sort'];
   for (const [key, value] of Object.entries(query)) {

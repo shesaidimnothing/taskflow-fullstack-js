@@ -1,4 +1,4 @@
-// Manage the MongoDB connection through Mongoose.
+// Gère la connexion à MongoDB avec Mongoose.
 import mongoose from 'mongoose';
 export async function connectDb(uri) {
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });

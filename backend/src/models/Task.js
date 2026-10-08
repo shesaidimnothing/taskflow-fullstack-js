@@ -1,4 +1,4 @@
-// Define task storage and the public task representation.
+// Définit le stockage des tâches et les données renvoyées par l'API.
 import mongoose from 'mongoose';
 import { isCivilDate } from '../utils/validation.js';
 const taskSchema = new mongoose.Schema({

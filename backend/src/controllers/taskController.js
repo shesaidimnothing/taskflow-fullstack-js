@@ -1,4 +1,4 @@
-// Translate task operations into HTTP responses.
+// Transforme les opérations sur les tâches en réponses HTTP.
 import * as service from '../services/taskService.js';
 export async function list(request, response) {
   response.json({ items: await service.listTasks(request.userId, request.query) });
