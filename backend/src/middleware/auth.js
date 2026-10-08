@@ -1,3 +1,4 @@
+// Authenticate JWTs and attach the current user to requests.
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { User } from '../models/User.js';

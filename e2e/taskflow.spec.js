@@ -165,3 +165,51 @@ test('page mon compte : consultation, modification du mot de passe et retour', a
   await expect(page.getByRole('button', { name: 'Menu utilisateur' })).toBeVisible();
 });
 
+
+test('calendrier : densité, suivi, navigation, tâches sans date et mobile', async ({ page, request }) => {
+  const registration = await request.post('/api/auth/register', { data: { email: 'calendar@example.test', password: 'Calendar123!' } });
+  const session = await registration.json();
+  const now = new Date();
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const headers = { Authorization: `Bearer ${session.token}` };
+  for (let i = 0; i < 5; i++) {
+    const response = await request.post('/api/tasks', { headers, data: { title: `Jour chargé ${i}`, status: 'todo', dueDate: `${prefix}-15` } });
+    expect(response.ok()).toBe(true);
+  }
+  await request.post('/api/tasks', { headers, data: { title: 'Jour léger', status: 'doing', dueDate: `${prefix}-16` } });
+  await request.post('/api/tasks', { headers, data: { title: 'Sans date', status: 'todo' } });
+  await page.goto('/');
+  await page.evaluate(session => sessionStorage.setItem('taskflow-session', JSON.stringify(session)), session);
+  await page.goto('/tasks');
+  await page.getByRole('button', { name: 'Calendrier', exact: true }).click();
+  const busyDay = page.locator(`[data-date="${prefix}-15"]`);
+  await expect(busyDay).toHaveClass(/density-4/);
+  await expect(page.locator(`[data-date="${prefix}-16"]`)).toHaveClass(/density-1/);
+  await expect(page.locator(`[data-date="${prefix}-17"]`)).toHaveClass(/density-0/);
+  await busyDay.click();
+  await expect(page.locator('.calendar-agenda')).toContainText('5 restante(s)');
+  await page.getByRole('button', { name: 'Terminer', exact: true }).first().click();
+  await expect(page.locator('.calendar-agenda')).toContainText('1 terminée(s)');
+  await page.getByRole('button', { name: 'À reprendre', exact: true }).click();
+  await expect(page.locator('.calendar-agenda')).toContainText('5 restante(s)');
+  await page.getByRole('button', { name: 'Vue annuelle' }).click();
+  await expect(page.locator('.calendar-heatmap .calendar-day')).toHaveCount(new Date(now.getFullYear(), 1, 29).getMonth() === 1 ? 366 : 365);
+  await page.getByRole('button', { name: 'Année précédente' }).click();
+  await expect(page.locator('.calendar-navigation h3')).toHaveText(String(now.getFullYear() - 1));
+  await page.getByRole('button', { name: 'Aujourd’hui' }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: '.local/screenshots/calendrier-annuel-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'Sans échéance (1)' }).click();
+  await expect(page.locator('.calendar-agenda')).toContainText('Sans date');
+  await page.getByRole('button', { name: 'Vue mensuelle' }).click();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await busyDay.click();
+  await page.screenshot({ path: '.local/screenshots/calendrier-mensuel.png', fullPage: true });
+  await page.locator('.agenda-title').first().click();
+  await page.getByRole('button', { name: 'Modifier', exact: true }).click();
+  await page.getByLabel('Échéance').fill(`${prefix}-16`);
+  await page.getByRole('button', { name: 'Enregistrer les modifications' }).click();
+  await expect(busyDay).toHaveAttribute('data-count', '4');
+  await expect(page.locator(`[data-date="${prefix}-16"]`)).toHaveAttribute('data-count', '2');
+});

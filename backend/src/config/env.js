@@ -1,3 +1,4 @@
+// Load and validate backend environment settings.
 import 'dotenv/config';
 export const config = {
   port: Number(process.env.PORT || 3000),

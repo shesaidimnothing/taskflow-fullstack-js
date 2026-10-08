@@ -1,3 +1,4 @@
+// Translate authentication operations into HTTP responses.
 import * as authService from '../services/authService.js';
 export async function register(request, response) {
   response.status(201).json(await authService.register(request.body));

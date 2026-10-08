@@ -1,3 +1,4 @@
+// Declare authenticated task CRUD routes.
 import { Router } from 'express';
 import * as controller from '../controllers/taskController.js';
 import { requireAuth } from '../middleware/auth.js';

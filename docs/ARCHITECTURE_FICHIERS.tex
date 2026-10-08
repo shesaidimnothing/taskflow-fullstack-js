@@ -1,0 +1,136 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=1.8cm,headheight=15pt]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\definecolor{forest}{HTML}{2B5142}
+\definecolor{muted}{HTML}{637167}
+\hypersetup{colorlinks=true,linkcolor=forest,urlcolor=forest,pdftitle={TaskFlow - dossiers et fichiers}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{forest}{TASKFLOW / GUIDE DU PROJET}}
+\fancyhead[R]{\small Architecture et données}
+\fancyfoot[L]{\small Inventaire local du dépôt}
+\fancyfoot[R]{\small\thepage}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+\setlist{nosep,leftmargin=1.4em}
+\begin{document}
+{\Huge\bfseries\textcolor{forest}{TaskFlow}}\\[0.25em]
+{\Large Dossiers, fichiers et stockage des données}\\
+\textcolor{muted}{Guide détaillé du dépôt local - inventaire du 8 octobre 2026}
+\section*{Où sont les données ?}
+TaskFlow conserve ses données métier dans MongoDB. En développement, la commande \texttt{npm run db:local} démarre MongoDB WiredTiger et écrit sur disque dans \texttt{.local/mongodb/}, à la racine du dépôt. Le chemin est construit dans \texttt{scripts/local-mongo.js}. Le dossier est caché (nom commençant par un point) et ignoré par Git dans \texttt{.gitignore}; les enregistrements ne sont donc pas commités ni envoyés sur GitHub. Les fichiers \texttt{.wt}, journaux et catalogues sont binaires : les ouvrir dans le Finder est possible, mais leur contenu ne se lit pas comme du texte et il ne faut pas les modifier manuellement.
+
+Pour l'inspecter dans le Finder depuis la racine : \texttt{open .local/mongodb}. Pour voir les données lisiblement, utiliser l'interface/API ou les commandes d'administration locale de \texttt{docs/DONNEES.md}. L'API ne permet pas de lister tous les comptes; la commande diagnostic locale peut afficher les emails, et doit rester réservée à la base de développement. Le mot de passe est stocké sous forme de hash bcrypt. Avec Docker, la persistance est dans le volume \texttt{taskflow-data} configuré dans \texttt{compose.yaml}. Les tests utilisent des bases temporaires séparées.
+
+\section*{Dossiers du projet}
+Les dossiers générés/ignorés (dépendances, build, caches, données, résultats de test) sont décrits pour expliquer leur usage, mais leurs fichiers internes ne sont pas déroulés un par un. L'inventaire fichier par fichier ci-dessous couvre les fichiers suivis par Git, la documentation Postman locale et les PDF/journaux présents dans \texttt{output/pdf}. Le fichier local \texttt{backend/.env} est signalé sans en révéler les secrets.
+\paragraph{\texttt{.github/workflows/}} Définition de la CI GitHub Actions.
+\paragraph{\texttt{.local/mongodb/}} Base locale persistante, fichiers binaires WiredTiger ignorés par Git.
+\paragraph{\texttt{.local/oral-preview/}} Rendus temporaires de pages pour contrôler le document oral.
+\paragraph{\texttt{.local/postman-preview/}} Rendus temporaires de pages pour vérifier le guide Postman.
+\paragraph{\texttt{.local/screenshots/}} Captures d'écran générées par les tests navigateur.
+\paragraph{\texttt{backend/src/config/}} Configuration et connexion base de données.
+\paragraph{\texttt{backend/src/controllers/}} Couche HTTP des contrôleurs.
+\paragraph{\texttt{backend/src/middleware/}} Authentification et gestion des erreurs Express.
+\paragraph{\texttt{backend/src/models/}} Schémas Mongoose et documents métier.
+\paragraph{\texttt{backend/src/routes/}} Déclaration des routes API.
+\paragraph{\texttt{backend/src/services/}} Logique métier et accès aux modèles.
+\paragraph{\texttt{backend/src/utils/}} Validation et fonctions d'erreurs partagées.
+\paragraph{\texttt{backend/test/}} Tests du backend.
+\paragraph{\texttt{docs/oral/}} Documents de préparation de l'oral.
+\paragraph{\texttt{docs/postman/}} Collection et guides des requêtes API.
+\paragraph{\texttt{e2e/}} Tests fonctionnels exécutés dans un navigateur.
+\paragraph{\texttt{frontend/dist/}} Build frontend généré, servi par Express en production locale.
+\paragraph{\texttt{frontend/src/components/}} Composants React réutilisables.
+\paragraph{\texttt{frontend/src/pages/}} Pages de l'application.
+\paragraph{\texttt{output/pdf/}} PDF livrables et journaux de compilation.
+\paragraph{\texttt{scripts/}} Outils de configuration et de vérification locale.
+\paragraph{\texttt{test-results/}} Résultats générés par Playwright.
+\paragraph{\texttt{node\_modules/}} Dépendances téléchargées par npm ; contenu généré, non détaillé fichier par fichier.
+\section*{Fichiers, un par un}
+\subsection*{.github}
+\paragraph{\texttt{.github/workflows/ci.yml}} Décrit les vérifications automatisées lancées par GitHub Actions.
+\subsection*{Fichiers à la racine}
+\paragraph{\texttt{.gitignore}} Liste les fichiers locaux ou générés à ne pas versionner, notamment .local, .env, node\_modules et dist.
+\paragraph{\texttt{README.md}} Guide principal : démarrage, architecture, routes API, sécurité, bonus et soutenance.
+\subsection*{backend}
+\paragraph{\texttt{backend/.env.example}} Modèle des variables de configuration du serveur, sans secret réel.
+\paragraph{\texttt{backend/package.json}} Dépendances, scripts, configuration Jest et métadonnées du backend.
+\paragraph{\texttt{backend/src/app.js}} Construit Express, branche les routes, expose santé/OpenAPI/Swagger et sert le frontend compilé.
+\paragraph{\texttt{backend/src/config/db.js}} Connexion et déconnexion Mongoose.
+\paragraph{\texttt{backend/src/config/env.js}} Charge et expose PORT, MONGODB\_URI et JWT\_SECRET.
+\paragraph{\texttt{backend/src/controllers/authController.js}} Transforme inscription, connexion et changement de mot de passe en réponses HTTP.
+\paragraph{\texttt{backend/src/controllers/taskController.js}} Gère les réponses HTTP des opérations de liste, création, lecture, modification et suppression.
+\paragraph{\texttt{backend/src/middleware/auth.js}} Vérifie le Bearer JWT et l'existence du compte avant une route privée.
+\paragraph{\texttt{backend/src/middleware/errors.js}} Convertit les erreurs applicatives en réponses JSON normalisées.
+\paragraph{\texttt{backend/src/models/Task.js}} Schéma MongoDB des tâches et forme publique retournée par l'API.
+\paragraph{\texttt{backend/src/models/User.js}} Schéma MongoDB des utilisateurs ; le hash de mot de passe est caché des lectures ordinaires.
+\paragraph{\texttt{backend/src/routes/authRoutes.js}} Déclare les routes register, login et changement de mot de passe.
+\paragraph{\texttt{backend/src/routes/taskRoutes.js}} Déclare les routes CRUD de tâches et impose l'authentification.
+\paragraph{\texttt{backend/src/server.js}} Valide la configuration, connecte MongoDB, démarre Express et gère l'arrêt propre.
+\paragraph{\texttt{backend/src/services/authService.js}} Inscrit et authentifie les comptes, hache les mots de passe et crée les JWT.
+\paragraph{\texttt{backend/src/services/taskService.js}} Valide et stocke les tâches, applique filtres/tri et isole les données par propriétaire.
+\paragraph{\texttt{backend/src/utils/errors.js}} Fabrique les erreurs HTTP standard de l'API.
+\paragraph{\texttt{backend/src/utils/validation.js}} Validation stricte des données d'authentification, de tâche, d'identifiant et de filtres.
+\paragraph{\texttt{backend/test/app.test.js}} Tests d'intégration de l'API : validation, authentification, CRUD, isolation et filtres.
+\paragraph{\texttt{backend/test/env.js}} Prépare les variables nécessaires à l'environnement de test.
+\subsection*{Fichiers à la racine}
+\paragraph{\texttt{compose.yaml}} Configuration Docker Compose de la base MongoDB avec volume persistant.
+\subsection*{docs}
+\paragraph{\texttt{docs/CONSIGNES\_PROF.md}} Comparaison des consignes pédagogiques avec les choix et fonctionnalités du projet.
+\paragraph{\texttt{docs/SOUTENANCE.md}} Conseils et déroulé pour préparer la démonstration orale.
+\paragraph{\texttt{docs/openapi.json}} Contrat OpenAPI consommé par Swagger et décrivant routes, paramètres et réponses.
+\paragraph{\texttt{docs/oral/DISCOURS\_10\_MINUTES.md}} Texte détaillé proposé pour une présentation orale d'environ dix minutes.
+\paragraph{\texttt{docs/oral/oral\_taskflow.tex}} Source LaTeX du document de préparation à l'oral.
+\paragraph{\texttt{docs/postman/TaskFlow.postman\_collection.json}} Collection Postman importable avec les scénarios de requêtes et scripts de test.
+\paragraph{\texttt{docs/postman/TaskFlow\_Postman\_requetes.tex}} Source LaTeX du guide complet des requêtes Postman.
+\paragraph{\texttt{docs/postman/TaskFlow\_Postman\_requetes.txt}} Guide texte des requêtes API et séquence de démonstration.
+\subsection*{e2e}
+\paragraph{\texttt{e2e/taskflow.spec.js}} Parcours de bout en bout du site dans un navigateur avec Playwright.
+\subsection*{Fichiers à la racine}
+\paragraph{\texttt{eslint.config.js}} Règles de lint JavaScript et React du dépôt.
+\subsection*{frontend}
+\paragraph{\texttt{frontend/index.html}} Document HTML hôte chargé par Vite avant le code React.
+\paragraph{\texttt{frontend/package.json}} Dépendances et scripts de développement/build du frontend.
+\paragraph{\texttt{frontend/src/App.jsx}} Routage React, session utilisateur et accès aux pages.
+\paragraph{\texttt{frontend/src/api.js}} Fonctions HTTP du navigateur, ajout du jeton et traitement des erreurs API.
+\paragraph{\texttt{frontend/src/components/Account.jsx}} Profil du compte connecté et formulaire de changement de mot de passe.
+\paragraph{\texttt{frontend/src/components/AccountMenu.jsx}} Menu utilisateur avec accès au compte et déconnexion.
+\paragraph{\texttt{frontend/src/components/AuthLayout.jsx}} Mise en page partagée des pages publiques de connexion et inscription.
+\paragraph{\texttt{frontend/src/components/Dashboard.jsx}} Coordonne chargement des tâches, sélection, création, modification et suppression.
+\paragraph{\texttt{frontend/src/components/Navbar.jsx}} Navigation principale du site.
+\paragraph{\texttt{frontend/src/components/TaskFilters.jsx}} Filtres de statut, priorité et échéance, ainsi que contrôles de tri.
+\paragraph{\texttt{frontend/src/components/TaskForm.jsx}} Formulaire de création et modification d'une tâche.
+\paragraph{\texttt{frontend/src/components/TaskItem.jsx}} Affiche une tâche et ses actions.
+\paragraph{\texttt{frontend/src/components/TaskList.jsx}} Affiche la liste de tâches et son état vide.
+\paragraph{\texttt{frontend/src/index.css}} Styles globaux et présentation responsive.
+\paragraph{\texttt{frontend/src/main.jsx}} Point d'entrée React ; monte l'application dans la page HTML.
+\paragraph{\texttt{frontend/src/pages/LoginPage.jsx}} Formulaire et flux de connexion.
+\paragraph{\texttt{frontend/src/pages/Registerpage.jsx}} Formulaire et flux de création de compte.
+\paragraph{\texttt{frontend/src/taskUtils.js}} Libellés, formatage des dates et fonctions utilitaires d'affichage des tâches.
+\paragraph{\texttt{frontend/vite.config.js}} Configuration Vite, serveur frontend et proxy des appels /api vers Express.
+\subsection*{output}
+\paragraph{\texttt{output/pdf/TaskFlow\_Postman\_requetes.log}} Journal de compilation LaTeX du guide Postman.
+\paragraph{\texttt{output/pdf/TaskFlow\_Postman\_requetes.pdf}} PDF compilé du guide des requêtes Postman.
+\paragraph{\texttt{output/pdf/oral\_taskflow.log}} Journal de compilation LaTeX du PDF oral.
+\paragraph{\texttt{output/pdf/oral\_taskflow.pdf}} PDF compilé du document de préparation à la soutenance.
+\subsection*{Fichiers à la racine}
+\paragraph{\texttt{package-lock.json}} Verrouille les versions exactes des dépendances npm à installer.
+\paragraph{\texttt{package.json}} Scripts racine, workspaces npm et outils partagés du projet.
+\paragraph{\texttt{playwright.config.js}} Configuration des navigateurs, du serveur et des suites Playwright.
+\subsection*{scripts}
+\paragraph{\texttt{scripts/check-persistence.js}} Vérifie qu'une tâche survit à l'arrêt puis au redémarrage du serveur.
+\paragraph{\texttt{scripts/e2e-server.js}} Prépare et arrête l'environnement serveur/base isolé des tests navigateur.
+\paragraph{\texttt{scripts/local-mongo.js}} Démarre MongoDB local persistant dans .local/mongodb avec WiredTiger.
+\paragraph{\texttt{scripts/setup.js}} Initialise la configuration locale du backend sans remplacer un fichier déjà présent.
+\section*{Périmètre et fichiers générés}
+L'inventaire est basé sur les fichiers présents dans le dépôt au moment de la rédaction. Les dossiers \texttt{node\_modules/} contiennent les bibliothèques téléchargées par npm et changent selon l'installation; ils ne sont pas détaillés fichier par fichier. \texttt{frontend/dist/}, \texttt{test-results/}, les captures et prévisualisations sont générés par les commandes de build ou de test. \texttt{.local/mongodb/} est une vraie base persistante : ne pas supprimer ce dossier si l'on veut garder les comptes et tâches.
+
+Pour les commandes d'inspection et les détails sur les collections MongoDB, voir \href{DONNEES.md}{docs/DONNEES.md}. Pour le contrat complet de l'API, voir \texttt{docs/openapi.json} ou ouvrir Swagger à \url{http://localhost:3000/api/docs/} après démarrage.
+\end{document}

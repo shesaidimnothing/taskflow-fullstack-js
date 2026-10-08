@@ -1,3 +1,4 @@
+// Connect the database and manage the HTTP server lifecycle.
 import app from './app.js';
 import { User } from './models/User.js';
 import { connectDb, disconnectDb } from './config/db.js';

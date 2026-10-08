@@ -1,0 +1,184 @@
+TASKFLOW - REQUETES POSTMAN (API LOCALE)
+========================================
+
+Le site React s'affiche dans un navigateur : http://localhost:5173
+Postman sert a appeler l'API et voir les reponses HTTP/JSON : http://localhost:3000
+Swagger interactif : http://localhost:3000/api/docs/
+
+DEMARRAGE
+---------
+Laisser les deux terminaux lances :
+  Terminal 1 : npm run db:local
+  Terminal 2 : npm run dev
+
+COLLECTION POSTMAN
+------------------
+Fichier a importer dans Postman : TaskFlow.postman_collection.json
+  Postman > Import > choisir ce fichier.
+La collection cree automatiquement deux comptes de test (A et B) avec des emails temporaires et memorise leurs jetons. Lancer les dossiers dans l'ordre numerique. Le compte A doit avoir un token valide pour appeler les routes protegees. Les tokens expirent apres une heure ; relancer la requete de connexion correspondante pour en obtenir un autre.
+
+REQUETES A SAISIR MANUELLEMENT
+------------------------------
+Pour chaque requete avec un corps, choisir Body > raw > JSON. Pour une route protegee, choisir Authorization > Bearer Token et coller le jeton retourne par la connexion.
+
+Variables que l'on peut creer dans un environnement Postman :
+  baseUrl = http://localhost:3000
+  tokenA  = jeton renvoye par la connexion du compte A
+  tokenB  = jeton renvoye par la connexion du compte B
+  taskId  = id renvoye par la creation de la tache
+
+1. Verifier l'API et le proxy frontend
+
+GET  http://localhost:3000/api/health
+Attendu : 200  {"status":"ok"}
+
+GET  http://localhost:5173/api/health
+Attendu : 200  {"status":"ok"} (requete API transmise par le proxy Vite)
+
+GET  http://localhost:3000/api/openapi.json
+Attendu : 200, description OpenAPI.
+
+GET  http://localhost:3000/api/docs/
+Attendu : 200, page HTML Swagger. Pour voir l'interface du site, utiliser Chrome/Safari sur http://localhost:5173.
+
+2. Creer et connecter le compte A
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+{
+  "email": "mon-compte-a@example.test",
+  "password": "TaskflowDemo123!"
+}
+Attendu : 201. La reponse contient user.id, user.email et token. Copie token dans la variable tokenA.
+Choisir une adresse unique. Si elle existe deja, l'inscription renvoie 409 EMAIL_ALREADY_USED.
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+{
+  "email": "mon-compte-a@example.test",
+  "password": "TaskflowDemo123!"
+}
+Attendu : 200. Mettre le token de la reponse dans tokenA.
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+{
+  "email": "mon-compte-a@example.test",
+  "password": "TaskflowDemo123!"
+}
+Attendu si ce compte vient d'être créé juste avant : 409 EMAIL_ALREADY_USED.
+
+3. Tester le CRUD des taches avec tokenA
+
+Pour chacune des requetes ci-dessous : Authorization > Bearer Token > {{tokenA}}.
+
+GET http://localhost:3000/api/tasks
+Attendu : 200, {"items":[]} si A n'a pas encore de tache.
+
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+{
+  "title": "Preparer la demonstration",
+  "status": "todo",
+  "description": "Verifier les requetes avec Postman.",
+  "dueDate": "2026-10-20"
+}
+Attendu : 201. Copier le champ id de la reponse dans taskId.
+Champs obligatoires : title et status. Statuts autorises : todo, doing, done.
+
+GET http://localhost:3000/api/tasks/{{taskId}}
+Attendu : 200 avec le detail de la tache.
+
+PATCH http://localhost:3000/api/tasks/{{taskId}}
+Content-Type: application/json
+{
+  "status": "doing"
+}
+Attendu : 200. PATCH permet de ne modifier qu'un champ.
+
+GET http://localhost:3000/api/tasks
+Attendu : 200. La liste contient maintenant la tache.
+
+DELETE http://localhost:3000/api/tasks/{{taskId}}
+Attendu : 204 sans corps.
+
+GET http://localhost:3000/api/tasks/{{taskId}}
+Attendu : 404 NOT_FOUND, car elle a ete supprimee.
+
+4. Tester les erreurs de validation avec tokenA
+
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+{
+  "title": "Mauvais statut",
+  "status": "archived"
+}
+Attendu : 400 INVALID_INPUT.
+
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+{
+  "title": "Mauvaise date",
+  "status": "todo",
+  "dueDate": "2026-02-29"
+}
+Attendu : 400 INVALID_INPUT, cette date n'existe pas.
+
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+{
+  "title": "Proprietaire falsifie",
+  "status": "todo",
+  "ownerId": "507f1f77bcf86cd799439011"
+}
+Attendu : 400 INVALID_INPUT. Le proprietaire est toujours determine par le serveur.
+
+GET http://localhost:3000/api/tasks/identifiant-invalide
+Attendu : 400 INVALID_INPUT.
+
+GET http://localhost:3000/api/tasks (sans Authorization)
+Attendu : 401 UNAUTHORIZED.
+
+5. Tester deux comptes et la confidentialite
+
+Creer le compte B comme dans la partie 2, avec un email different, puis copier son token dans tokenB.
+
+POST http://localhost:3000/api/tasks avec tokenA
+{
+  "title": "Tache privee du compte A",
+  "status": "todo"
+}
+Attendu : 201. Garder son id dans taskId.
+
+GET http://localhost:3000/api/tasks avec tokenB
+Attendu : 200, liste vide.
+
+GET http://localhost:3000/api/tasks/{{taskId}} avec tokenB
+PATCH http://localhost:3000/api/tasks/{{taskId}} avec tokenB, corps {"status":"done"}
+DELETE http://localhost:3000/api/tasks/{{taskId}} avec tokenB
+Attendu pour ces trois requetes : 404 NOT_FOUND.
+
+GET http://localhost:3000/api/tasks/{{taskId}} avec tokenA
+Attendu : 200. La tache de A n'a pas ete modifiee par B.
+
+6. Changer le mot de passe (facultatif)
+
+PATCH http://localhost:3000/api/auth/password avec tokenA
+Content-Type: application/json
+{
+  "currentPassword": "TaskflowDemo123!",
+  "newPassword": "TaskflowNouveau123!"
+}
+Attendu : 204 sans corps. Ensuite, se reconnecter avec le nouveau mot de passe.
+
+CODES DE REPONSE A RETENIR
+--------------------------
+200 : lecture, connexion ou mise a jour reussie.
+201 : ressource creee.
+204 : suppression ou changement de mot de passe, sans corps.
+400 : corps, champ, date ou identifiant invalide.
+401 : jeton absent/invalide/expire ou identifiants refuses.
+404 : objet absent ou appartenant a un autre compte.
+409 : email deja utilise.
+
+Les comptes crees manuellement et leurs taches restent dans la base MongoDB locale. Utilise uniquement des adresses et mots de passe de demonstration, jamais tes vrais identifiants personnels.

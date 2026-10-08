@@ -1,3 +1,4 @@
+// Manage credentials, password hashing, and signed sessions.
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';

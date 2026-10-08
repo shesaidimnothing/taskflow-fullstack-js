@@ -1,3 +1,4 @@
+// Translate task operations into HTTP responses.
 import * as service from '../services/taskService.js';
 export async function list(request, response) {
   response.json({ items: await service.listTasks(request.userId, request.query) });

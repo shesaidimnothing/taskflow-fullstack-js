@@ -1,3 +1,4 @@
+// Define task storage and the public task representation.
 import mongoose from 'mongoose';
 import { isCivilDate } from '../utils/validation.js';
 const taskSchema = new mongoose.Schema({

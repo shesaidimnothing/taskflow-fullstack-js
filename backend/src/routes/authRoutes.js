@@ -1,3 +1,4 @@
+// Declare registration, login, and password routes.
 import { Router } from 'express';
 import * as controller from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';

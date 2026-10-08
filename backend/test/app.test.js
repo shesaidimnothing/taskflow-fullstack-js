@@ -1,3 +1,4 @@
+// Test API behavior, validation, and account isolation.
 import request from 'supertest';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';

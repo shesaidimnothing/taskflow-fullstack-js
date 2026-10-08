@@ -1,0 +1,400 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=1.85cm,headheight=15pt]{geometry}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\definecolor{forest}{HTML}{2B5142}
+\definecolor{mist}{HTML}{F1F4EF}
+\definecolor{ink}{HTML}{33433A}
+\definecolor{muted}{HTML}{637167}
+\definecolor{codeblue}{HTML}{285C78}
+\definecolor{codegreen}{HTML}{506D39}
+\hypersetup{colorlinks=true,linkcolor=forest,urlcolor=forest,pdftitle={TaskFlow - Toutes les requêtes Postman}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{forest}{TASKFLOW / GUIDE POSTMAN}}
+\fancyhead[R]{\small API locale - collection complète}
+\fancyfoot[L]{\small Full Stack JS - sujet A}
+\fancyfoot[R]{\small\thepage}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+\setlist{nosep,leftmargin=1.4em}
+\renewcommand{\arraystretch}{1.2}
+\lstdefinestyle{requestcode}{
+ basicstyle=\ttfamily\small,
+ backgroundcolor=\color{mist},
+ frame=single,
+ rulecolor=\color{forest!20},
+ framerule=0.3pt,
+ breaklines=true,
+ breakatwhitespace=false,
+ columns=fullflexible,
+ keepspaces=true,
+ showstringspaces=false,
+ upquote=true,
+ xleftmargin=0.35em,
+ xrightmargin=0.35em,
+ aboveskip=0.45em,
+ belowskip=0.45em,
+ literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ù}{{\`u}}1 {ç}{{\c c}}1 {É}{{\'E}}1 {ô}{{\^o}}1 {î}{{\^i}}1 {û}{{\^u}}1 {'}{{'}}1 {→}{{$\rightarrow$}}1
+}
+\newcommand{\expected}[2]{\par\smallskip\noindent\colorbox{forest!9}{\parbox{\dimexpr\linewidth-2\fboxsep}{\textcolor{forest}{\textbf{Réponse attendue : HTTP #1}}\hspace{0.4em}#2}}\par\medskip}
+\newcommand{\reqheading}[3]{\subsubsection*{\textcolor{forest}{#1}\hfill\textcolor{ink}{\small #2}}\textit{#3}\par}
+\begin{document}
+{\Huge\bfseries\textcolor{forest}{TaskFlow}}\par
+{\Large Toutes les requêtes Postman}\par
+\textcolor{muted}{Guide complet de l'API locale - sujet A : gestion de tâches personnelles}\par
+\vspace{0.5em}
+\section*{Démarrer et importer}
+L'API et la base de données doivent tourner. Dans le premier terminal, démarrer MongoDB avec \texttt{npm run db:local}. Dans le second, démarrer Express et Vite avec \texttt{npm run dev}. Le site visuel se consulte dans un navigateur à \url{http://localhost:5173}; Postman sert à interroger l'API.
+
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}p{3.0cm}X@{}}
+API & \texttt{http://localhost:3000}\\
+Interface web & \url{http://localhost:5173}\\
+Swagger & \url{http://localhost:3000/api/docs/}\\
+OpenAPI & \url{http://localhost:3000/api/openapi.json}\\
+\end{tabularx}
+
+Dans Postman, importer \texttt{TaskFlow.postman\_collection.json}. La collection crée automatiquement des adresses de test distinctes, conserve \texttt{tokenA}, \texttt{tokenB} et \texttt{taskId}, puis ajoute le jeton Bearer aux opérations privées. Exécuter les dossiers numérotés dans l'ordre. Les jetons expirent après une heure : relancer la requête de connexion correspondante si nécessaire.
+
+Pour saisir une requête manuellement, créer un environnement avec \texttt{baseUrl = http://localhost:3000}, puis remplir \texttt{tokenA}, \texttt{tokenB} et \texttt{taskId} avec les valeurs reçues. Pour les requêtes JSON, choisir \textbf{Body > raw > JSON}. Pour une route privée, choisir \textbf{Authorization > Bearer Token} et fournir le jeton du compte visé.
+
+\begin{tabularx}{\linewidth}{@{}p{2.4cm}X@{}}
+\textcolor{forest}{\textbf{200}} & Lecture, connexion ou modification réussie.\\
+\textcolor{forest}{\textbf{201}} & Création réussie.\\
+\textcolor{forest}{\textbf{204}} & Suppression ou changement de mot de passe, sans corps.\\
+\textcolor{forest}{\textbf{400}} & Entrée, identifiant ou valeur invalide.\\
+\textcolor{forest}{\textbf{401}} & Authentification absente ou refusée.\\
+\textcolor{forest}{\textbf{404}} & Objet absent ou appartenant à un autre compte.\\
+\textcolor{forest}{\textbf{409}} & Adresse email déjà utilisée.\\
+\end{tabularx}
+\tableofcontents
+\newpage
+\section{1 - Vérifier les serveurs}
+Contrôles publics : santé, proxy Vite, OpenAPI, Swagger et route inconnue.
+\reqheading{API - Santé}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/health
+\end{lstlisting}
+\expected{200}{Corps : {"status":"ok"}.}
+\vspace{0.25em}
+\reqheading{API - Spécification OpenAPI}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/openapi.json
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{API - Interface Swagger}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/docs/
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{API - Réponse 404 sur route inconnue}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/does-not-exist
+\end{lstlisting}
+\expected{404}{Erreur : NOT\_FOUND.}
+\vspace{0.25em}
+\newpage
+\section{2 - Compte A et authentification}
+Créer A puis récupérer son JWT. Les deux routes d'authentification sont publiques.
+\reqheading{A - Créer un compte}{POST}{Première exécution : crée A avec une adresse de test. La collection enregistre son tokenA. Si le compte existe déjà, utiliser A - Se connecter.}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailA}}",
+  "password": "{{passwordA}}"
+}
+\end{lstlisting}
+\expected{201}{Réponse : user.id, user.email et token. Aucun mot de passe ni hash n'est renvoyé.}
+\vspace{0.25em}
+\reqheading{A - Email déjà utilisé (409)}{POST}{Après l'inscription A, réutiliser le même email. Le serveur refuse la deuxième inscription.}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailA}}",
+  "password": "{{passwordA}}"
+}
+\end{lstlisting}
+\expected{409}{Erreur : EMAIL\_ALREADY\_USED.}
+\vspace{0.25em}
+\reqheading{A - Se connecter}{POST}{Récupère un nouveau tokenA après la création de A. Exécuter après A - Créer un compte ou plus tard pour renouveler le jeton.}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailA}}",
+  "password": "{{passwordA}}"
+}
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\newpage
+\section{3 - CRUD des tâches avec A}
+La création enregistre automatiquement taskId, utilisé par le détail, la modification et la suppression.
+\reqheading{A - Lister mes tâches}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{200}{Réponse : {"items":[...]} ; une liste vide vaut {"items":[]}.}
+\vspace{0.25em}
+\reqheading{A - Créer une tâche}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "title": "Préparer la démonstration",
+  "status": "todo",
+  "description": "Tester les requêtes dans Postman.",
+  "dueDate": "2026-10-20"
+}
+\end{lstlisting}
+\expected{201}{La réponse contient la tâche créée avec son identifiant public id.}
+\vspace{0.25em}
+\reqheading{A - Voir la tâche}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{A - Modifier partiellement (PATCH)}{PATCH}{}
+\begin{lstlisting}[style=requestcode]
+PATCH http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "status": "doing"
+}
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{A - Rejeter un statut invalide}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "title": "Statut refusé",
+  "status": "archived"
+}
+\end{lstlisting}
+\expected{400}{Erreur : INVALID\_INPUT.}
+\vspace{0.25em}
+\reqheading{A - Rejeter un champ ownerId falsifié}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "title": "Propriétaire falsifié",
+  "status": "todo",
+  "ownerId": "507f1f77bcf86cd799439011"
+}
+\end{lstlisting}
+\expected{400}{Erreur : INVALID\_INPUT.}
+\vspace{0.25em}
+\reqheading{A - Identifiant malformé}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks/identifiant-invalide
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{400}{Erreur : INVALID\_INPUT.}
+\vspace{0.25em}
+\reqheading{A - Supprimer la tâche}{DELETE}{La suppression réussie ne renvoie aucun corps.}
+\begin{lstlisting}[style=requestcode]
+DELETE http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+(aucun corps)
+\end{lstlisting}
+\expected{204}{Succès sans corps de réponse.}
+\vspace{0.25em}
+\reqheading{A - Vérifier que la tâche supprimée est absente}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{404}{Erreur : NOT\_FOUND.}
+\vspace{0.25em}
+\newpage
+\section{4 - Confidentialité entre A et B}
+B crée son propre jeton et vérifie qu'il ne voit ni ne modifie les objets de A.
+\reqheading{B - Créer un compte}{POST}{Crée B avec une adresse différente et enregistre son tokenB.}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailB}}",
+  "password": "{{passwordB}}"
+}
+\end{lstlisting}
+\expected{201}{}
+\vspace{0.25em}
+\reqheading{B - Se connecter}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailB}}",
+  "password": "{{passwordB}}"
+}
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{B - Liste privée (vide au départ)}{GET}{Exécuter avant de créer une tâche pour B. Aucune tâche de A ne doit apparaître.}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{200}{Réponse : {"items":[]} si B n'a pas encore créé de tâche.}
+\vspace{0.25em}
+\reqheading{A - Créer une tâche privée}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/tasks
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "title": "Tâche privée de A",
+  "status": "todo"
+}
+\end{lstlisting}
+\expected{201}{La réponse contient la tâche créée avec son identifiant public id.}
+\vspace{0.25em}
+\reqheading{B - Lecture de la tâche A refusée}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenB}}
+\end{lstlisting}
+\expected{404}{Erreur : NOT\_FOUND.}
+\vspace{0.25em}
+\reqheading{B - Modification de la tâche A refusée}{PATCH}{}
+\begin{lstlisting}[style=requestcode]
+PATCH http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "status": "done"
+}
+\end{lstlisting}
+\expected{404}{Erreur : NOT\_FOUND.}
+\vspace{0.25em}
+\reqheading{B - Suppression de la tâche A refusée}{DELETE}{}
+\begin{lstlisting}[style=requestcode]
+DELETE http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenB}}
+(aucun corps)
+\end{lstlisting}
+\expected{404}{Erreur : NOT\_FOUND.}
+\vspace{0.25em}
+\reqheading{A - Sa tâche est toujours là}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+\end{lstlisting}
+\expected{200}{}
+\vspace{0.25em}
+\reqheading{A - Nettoyage : supprimer sa tâche}{DELETE}{}
+\begin{lstlisting}[style=requestcode]
+DELETE http://localhost:3000/api/tasks/{{taskId}}
+Authorization: Bearer {{tokenA}}
+(aucun corps)
+\end{lstlisting}
+\expected{204}{Succès sans corps de réponse.}
+\vspace{0.25em}
+\newpage
+\section{5 - Mot de passe et absence de jeton}
+Modifier le mot de passe de A ou vérifier le refus d'une route privée sans authentification.
+\reqheading{A - Connexion refusée (mot de passe incorrect)}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "{{emailA}}",
+  "password": "mauvais-mot-de-passe"
+}
+\end{lstlisting}
+\expected{401}{Erreur : UNAUTHORIZED.}
+\vspace{0.25em}
+\reqheading{A - Modifier le mot de passe}{PATCH}{Remplace passwordA par newPassword dans les variables après succès afin de pouvoir ensuite se reconnecter.}
+\begin{lstlisting}[style=requestcode]
+PATCH http://localhost:3000/api/auth/password
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "currentPassword": "{{passwordA}}",
+  "newPassword": "{{newPassword}}"
+}
+\end{lstlisting}
+\expected{204}{Succès sans corps de réponse.}
+\vspace{0.25em}
+\reqheading{Tâches sans connexion : refusées}{GET}{}
+\begin{lstlisting}[style=requestcode]
+GET http://localhost:3000/api/tasks
+\end{lstlisting}
+\expected{401}{Erreur : UNAUTHORIZED.}
+\vspace{0.25em}
+\reqheading{A - Inscription invalide (email)}{POST}{}
+\begin{lstlisting}[style=requestcode]
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+Body (raw / JSON):
+{
+  "email": "pas-une-adresse",
+  "password": "TaskflowDemo123!"
+}
+\end{lstlisting}
+\expected{400}{Erreur : INVALID\_INPUT.}
+\vspace{0.25em}
+\newpage
+\section*{Notes d'utilisation}
+\begin{itemize}
+\item Les routes des tâches exigent un JWT : \texttt{tokenA} pour A et \texttt{tokenB} pour B. Les deux comptes ont des tâches distinctes.
+\item Le champ \texttt{taskId} vient de la réponse à POST \texttt{/api/tasks}. Si la variable est vide, exécuter d'abord la création.
+\item Dans le scénario A/B, B doit recevoir 404 pour GET, PATCH et DELETE sur une tâche qui appartient à A. Refaire un GET avec tokenA confirme que l'objet de A existe toujours.
+\item Pour réutiliser la collection, relancer les requêtes de connexion si les jetons ont expiré. Si une adresse de test est déjà utilisée, choisir une autre adresse ou exécuter la connexion plutôt que l'inscription.
+\item Les comptes créés demeurent dans la base locale. Supprimer les tâches de test avec DELETE après la démonstration. Le projet ne propose pas de suppression de compte.
+\item Les mots de passe de la collection sont réservés à une démonstration locale. Ne pas les réutiliser pour un compte personnel.
+\end{itemize}
+
+\vfill
+\textcolor{muted}{Guide établi à partir du contrat API TaskFlow du livret étudiant V2 et du fichier OpenAPI livré avec le projet. Les exemples utilisent exclusivement des données fictives.}
+\end{document}

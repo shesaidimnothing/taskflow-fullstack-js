@@ -33,7 +33,7 @@ Ouvrir **http://localhost:5173** et créer un compte. Aucun compte ni mot de pas
 
 `npm run setup` crée `backend/.env` avec une clé JWT aléatoire ; un fichier existant est conservé. Le modèle sans secret est [backend/.env.example](backend/.env.example). Ne pas mettre de clé JWT dans une variable `VITE_*`.
 
-`npm run db:local` démarre un vrai processus MongoDB 7.0.14, géré par mongodb-memory-server, avec le moteur **WiredTiger et un dossier durable `.local/mongodb/`**. Malgré le nom de la bibliothèque, ce mode de développement conserve les données sur disque. Les tests emploient d’autres instances temporaires. Arrêter les processus avec Ctrl+C. Ne pas lancer deux bases sur le port 27017.
+`npm run db:local` démarre un vrai processus MongoDB 7.0.14, géré par mongodb-memory-server, avec le moteur **WiredTiger et un dossier durable `.local/mongodb/`**. Malgré le nom de la bibliothèque, ce mode de développement conserve les données sur disque. Les tests emploient d’autres instances temporaires. Arrêter les processus avec Ctrl+C. Ne pas lancer deux bases sur le port 27017. Le dossier `.local/mongodb/` contient des fichiers binaires MongoDB : ils ne se lisent pas à la main. Les procédures pour consulter les tâches par l’API et inspecter les enregistrements de développement sont dans [docs/DONNEES.md](docs/DONNEES.md).
 
 ### Alternative Docker pour MongoDB
 
@@ -204,3 +204,9 @@ pdflatex -output-directory=output/pdf docs/oral/oral_taskflow.tex
 Le PDF fourni est compilé avec Tectonic (moteur XeTeX). Le discours compte environ 1 200 mots et réserve du temps aux manipulations ; répéter avec un chronomètre pour ajuster le rythme aux dix minutes.
 
 La page Mon compte et le menu utilisateur ajoutés à distance ont été conservés lors de l’intégration. `/account` permet de consulter le profil et de modifier son mot de passe avec le mot de passe actuel. Cela ne remplace pas une récupération de mot de passe oublié.
+
+## Calendrier des tâches
+
+Dans l'espace des tâches, le bouton **Calendrier** ouvre une vue mensuelle ou une grille annuelle inspirée des contributions GitHub. Les cinq nuances de vert représentent 0, 1, 2, 3 à 4 et 5 tâches ou plus, selon leur date d'échéance. Les tâches terminées restent comptées : la couleur indique la charge planifiée, pas un historique des dates de réalisation.
+
+Cliquer sur un jour affiche les tâches prévues et leur progression. Les boutons **Terminer** et **À reprendre** enregistrent le statut via l'API ; ouvrir une tâche permet aussi de modifier son échéance ou de la supprimer. **Sans échéance** regroupe les tâches non planifiées. Le calendrier affiche toutes les tâches du compte, indépendamment des filtres de la liste. La grille annuelle défile horizontalement sur mobile.
